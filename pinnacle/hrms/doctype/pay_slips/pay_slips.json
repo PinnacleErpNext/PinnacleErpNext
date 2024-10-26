@@ -1,0 +1,694 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:pay-slip-{month_num}-{employee_id}",
+ "creation": "2024-10-26 16:42:18.428127",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_i1vh",
+  "year",
+  "company",
+  "employee_id",
+  "employee_name",
+  "personal_email",
+  "designation",
+  "department",
+  "standard_working_days",
+  "column_break_zaxe",
+  "month",
+  "month_num",
+  "pan_number",
+  "date_of_joining",
+  "attendance_device_id",
+  "basic_salary",
+  "per_day_salary",
+  "actual_working_days",
+  "full_day_working",
+  "full_day_working_days",
+  "column_break_goxs",
+  "full_days_working_rate",
+  "column_break_3aod",
+  "full_day_working_total",
+  "column_break_xedv",
+  "full_day_working_effective_percent",
+  "column_break_drah",
+  "full_day_working_amount",
+  "quarter_day_working",
+  "quarter_day_working_days",
+  "column_break_2v9e",
+  "quarter_day_working_rate",
+  "column_break_nsjk",
+  "quarter_day_working_total",
+  "column_break_35vn",
+  "quarter_day_working_effective_percent",
+  "column_break_bbrb",
+  "quarter_day_working_amount",
+  "half_day_working",
+  "half_day_working_days",
+  "column_break_3uf3",
+  "half_day_working_rate",
+  "column_break_kg02",
+  "half_day_working_total",
+  "column_break_ufkr",
+  "half_day_working_effective_percent",
+  "column_break_09uz",
+  "half_day_working_amount",
+  "3_4_quarter_day_working",
+  "three_four_quarter_days_working_days",
+  "column_break_0kbg",
+  "three_four_quarter_days_rate",
+  "column_break_rjqy",
+  "three_four_quarter_day_working_total",
+  "column_break_ms4w",
+  "three_four_quarter_days_working_effective_percent",
+  "column_break_clqz",
+  "three_four_quarter_days_working_amount",
+  "lates",
+  "lates_days",
+  "column_break_zzdc",
+  "lates_rate",
+  "column_break_t4dj",
+  "lates_total",
+  "column_break_blbg",
+  "lates_effective_paercent",
+  "column_break_clkt",
+  "lates_amount",
+  "total_monthly_salary_section",
+  "absent",
+  "total",
+  "sundays_working_section",
+  "sundays_working_days",
+  "column_break_vqpy",
+  "sunday_working_rate",
+  "column_break_e4vs",
+  "sunday_working_total",
+  "column_break_7w1f",
+  "sundays_working_effective_perent",
+  "column_break_pnem",
+  "sunday_working_amount",
+  "other_earnings_section",
+  "other_earnings_incentives",
+  "column_break_euil",
+  "other_earning_project_deadline_allowance",
+  "column_break_fcpa",
+  "other_earnings_special_incentives",
+  "column_break_lm7i",
+  "other_earnings_leave_encashent",
+  "column_break_buem",
+  "other_ernings_holidays_amount",
+  "column_break_cgrd",
+  "other_earnings_amount",
+  "other_adjustments_section",
+  "adjustment_type",
+  "column_break_6qho",
+  "adjustments",
+  "net_payable_amount_section",
+  "net_payble_amount"
+ ],
+ "fields": [
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "employee.personal_email",
+   "fieldname": "personal_email",
+   "fieldtype": "Data",
+   "label": "Personal Email"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fetch_from": "employee.pan_number",
+   "fieldname": "pan_number",
+   "fieldtype": "Data",
+   "label": "Pan Number"
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Date",
+   "label": "Date Of Joining"
+  },
+  {
+   "fetch_from": "employee.basic_salary",
+   "fieldname": "basic_salary",
+   "fieldtype": "Currency",
+   "label": "Basic Salary"
+  },
+  {
+   "fieldname": "per_day_salary",
+   "fieldtype": "Currency",
+   "label": "Per Day Salary"
+  },
+  {
+   "fetch_from": "employee.attendance_device_id",
+   "fieldname": "attendance_device_id",
+   "fieldtype": "Int",
+   "label": "Attendance Device Id"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "section_break_i1vh",
+   "fieldtype": "Section Break",
+   "label": "Employee Information"
+  },
+  {
+   "fieldname": "column_break_zaxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Employee Id",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "full_day_working",
+   "fieldtype": "Section Break",
+   "label": "Full Day Working"
+  },
+  {
+   "fieldname": "half_day_working",
+   "fieldtype": "Section Break",
+   "label": "Half Day Working"
+  },
+  {
+   "fieldname": "quarter_day_working",
+   "fieldtype": "Section Break",
+   "label": "Quarter Day Working"
+  },
+  {
+   "fieldname": "lates",
+   "fieldtype": "Section Break",
+   "label": "Lates"
+  },
+  {
+   "fieldname": "column_break_goxs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3aod",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xedv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_drah",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3uf3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_kg02",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ufkr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_09uz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2v9e",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_nsjk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_35vn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_bbrb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_0kbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rjqy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ms4w",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_clqz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zzdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "column_break_t4dj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_blbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_clkt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sundays_working_section",
+   "fieldtype": "Section Break",
+   "label": "Sundays Working"
+  },
+  {
+   "default": "0",
+   "fieldname": "sundays_working_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "sunday_working_rate",
+   "fieldtype": "Int",
+   "label": "Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "sunday_working_total",
+   "fieldtype": "Int",
+   "label": "total"
+  },
+  {
+   "default": "0",
+   "fieldname": "sunday_working_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_vqpy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_e4vs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_7w1f",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pnem",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_earnings_section",
+   "fieldtype": "Section Break",
+   "label": "Other Earnings"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_earnings_incentives",
+   "fieldtype": "Currency",
+   "label": "Incentives"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_earning_project_deadline_allowance",
+   "fieldtype": "Currency",
+   "label": "Project Deadline Allowance"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_earnings_special_incentives",
+   "fieldtype": "Currency",
+   "label": "Special Incentives"
+  },
+  {
+   "fieldname": "column_break_euil",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fcpa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_buem",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_earnings_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "other_adjustments_section",
+   "fieldtype": "Section Break",
+   "label": "Other Adjustments"
+  },
+  {
+   "default": "0",
+   "fieldname": "adjustments",
+   "fieldtype": "Currency",
+   "label": "Adjustments"
+  },
+  {
+   "fieldname": "total_monthly_salary_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "absent",
+   "fieldtype": "Int",
+   "label": "Absent"
+  },
+  {
+   "fieldname": "net_payable_amount_section",
+   "fieldtype": "Section Break",
+   "label": "Net Payable Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "net_payble_amount",
+   "fieldtype": "Currency",
+   "label": "Total Monthly Salary + Sundays Working + Other Earnings - Adjustments"
+  },
+  {
+   "default": "0",
+   "fieldname": "full_day_working_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "full_days_working_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "full_day_working_total",
+   "fieldtype": "Int",
+   "label": "Total"
+  },
+  {
+   "default": "100",
+   "fieldname": "full_day_working_effective_percent",
+   "fieldtype": "Percent",
+   "label": "Effective Percent"
+  },
+  {
+   "default": "0",
+   "fieldname": "full_day_working_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_working_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_working_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_working_total",
+   "fieldtype": "Int",
+   "label": "Total"
+  },
+  {
+   "default": "50",
+   "fieldname": "half_day_working_effective_percent",
+   "fieldtype": "Percent",
+   "label": "Effective Percent"
+  },
+  {
+   "default": "0",
+   "fieldname": "half_day_working_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "quarter_day_working_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "quarter_day_working_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "quarter_day_working_total",
+   "fieldtype": "Int",
+   "label": "Total"
+  },
+  {
+   "default": "75",
+   "fieldname": "quarter_day_working_effective_percent",
+   "fieldtype": "Percent",
+   "label": "Effective Percent "
+  },
+  {
+   "default": "0",
+   "fieldname": "quarter_day_working_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "lates_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "lates_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "lates_total",
+   "fieldtype": "Int",
+   "label": "Total"
+  },
+  {
+   "default": "10",
+   "fieldname": "lates_effective_paercent",
+   "fieldtype": "Percent",
+   "label": "Effective Percent"
+  },
+  {
+   "default": "0",
+   "fieldname": "lates_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "default": "100",
+   "fieldname": "sundays_working_effective_perent",
+   "fieldtype": "Currency",
+   "label": "Effective Percent"
+  },
+  {
+   "fieldname": "column_break_lm7i",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "three_four_quarter_days_working_days",
+   "fieldtype": "Int",
+   "label": "Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "three_four_quarter_days_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "three_four_quarter_day_working_total",
+   "fieldtype": "Int",
+   "label": "Total"
+  },
+  {
+   "default": "25",
+   "fieldname": "three_four_quarter_days_working_effective_percent",
+   "fieldtype": "Percent",
+   "label": "Effective Percent"
+  },
+  {
+   "default": "0",
+   "fieldname": "three_four_quarter_days_working_amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "3_4_quarter_day_working",
+   "fieldtype": "Section Break",
+   "label": "3/4 Quarter Day Working"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Month"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Year"
+  },
+  {
+   "fieldname": "standard_working_days",
+   "fieldtype": "Int",
+   "label": "Standard Working Days"
+  },
+  {
+   "fieldname": "actual_working_days",
+   "fieldtype": "Int",
+   "label": "Actual Working Days"
+  },
+  {
+   "default": "0",
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total Monthly Salary [Full Day Working + Quarter Day Working + Half Day Working + 3/4 Quarter Day Working - Amount of Lates]"
+  },
+  {
+   "fieldname": "month_num",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Month Num"
+  },
+  {
+   "fieldname": "column_break_cgrd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_ernings_holidays_amount",
+   "fieldtype": "Float",
+   "label": "Holidays Amount"
+  },
+  {
+   "fieldname": "adjustment_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Adjustment Type",
+   "mandatory_depends_on": "adjustments"
+  },
+  {
+   "fieldname": "column_break_6qho",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_earnings_leave_encashent",
+   "fieldtype": "Currency",
+   "label": "Leave Encashent"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-27 01:08:15.358711",
+ "modified_by": "Administrator",
+ "module": "HRMS",
+ "name": "Pay Slips",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "role": "Employee"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

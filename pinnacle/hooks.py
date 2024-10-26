@@ -10,6 +10,11 @@ app_license = "mit"
 
 # required_apps = []
 
+fixtures = [
+    {'dt': 'Print Format', 'filters': [['name', 'in', ['Pay Slip Format']]]},
+    {'dt':'Custom Field','filters':[['name','in',['Employee Checkin-custom_comment']]]}
+]
+
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
