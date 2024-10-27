@@ -4,13 +4,17 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2024-10-26 18:47:21.959411",
+ "modified": "2024-10-27 11:45:16.216007",
  "modified_by": "Administrator",
  "module": "Globals",
  "name": "set-defaults",
  "owner": "Administrator",
  "page_name": "set-defaults",
- "roles": [],
+ "roles": [
+  {
+   "role": "Employee"
+  }
+ ],
  "script": null,
  "standard": "Yes",
  "style": null,

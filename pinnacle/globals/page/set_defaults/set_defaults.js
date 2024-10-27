@@ -26,7 +26,7 @@ frappe.pages["set-defaults"].on_page_load = function (wrapper) {
 	  var selectedCompany = $("#company-select").val();
 	  var selectedFiscalYear = $("#select-fiscal_year").val();
 	  frappe.call({
-		method: "mygstcafe.api.set_default_settings",
+		method: "pinnacle.api.set_default_settings",
 		args: {
 		  data: JSON.stringify({
 			company_name: selectedCompany,
@@ -61,7 +61,7 @@ frappe.pages["set-defaults"].on_page_load = function (wrapper) {
   
 	// Fetch default company and fiscal_year, companies and fiscal years
 	frappe.call({
-	  method: "mygstcafe.api.get_default_company_and_list",
+	  method: "pinnacle.api.get_default_company_and_list",
 	  callback: function (res) {
 		if (res.message) {
 		  var data = res.message;
