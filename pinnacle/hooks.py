@@ -5,7 +5,7 @@ app_description = "An app to manage to pinnacle"
 app_email = "admin@otpl.in"
 app_license = "mit"
 
-import pinnacle.globals.override_auth
+import pinnacle.pinnacle_globals.override_auth
 
 # Apps
 # ------------------

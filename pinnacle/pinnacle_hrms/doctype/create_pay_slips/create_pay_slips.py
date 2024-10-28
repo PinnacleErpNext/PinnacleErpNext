@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from collections import defaultdict
-from pinnacle.hrms.doctype.salary_calculation import calculate_monthly_salary
+from pinnacle.pinnacle_hrms.doctype.salary_calculation import calculate_monthly_salary
 
 class CreatePaySlips(Document):
     

@@ -22,6 +22,28 @@
    "label": "Year"
   },
   {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "requested_date",
+   "fieldtype": "Date",
+   "label": "Requested Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approval_date",
+   "fieldtype": "Date",
+   "label": "Approval Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dpa1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "month",
    "fieldtype": "Select",
    "label": "Month",
@@ -35,12 +57,6 @@
    "options": "\nRequested\nApproved\nRejected"
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "label": "Employee",
-   "options": "Employee"
-  },
-  {
    "fetch_from": "employee.employee",
    "fieldname": "requested_by",
    "fieldtype": "Data",
@@ -48,33 +64,17 @@
    "read_only": 1
   },
   {
-   "fieldname": "requested_date",
-   "fieldtype": "Date",
-   "label": "Requested Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "approved_by",
    "fieldtype": "Data",
    "label": "Approved By",
    "read_only": 1
-  },
-  {
-   "fieldname": "approval_date",
-   "fieldtype": "Date",
-   "label": "Approval Date",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_dpa1",
-   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-26 17:01:58.905278",
+ "modified": "2024-10-28 12:03:44.945768",
  "modified_by": "Administrator",
- "module": "HRMS",
+ "module": "Pinnacle-HRMS",
  "name": "Request Pay Slip",
  "owner": "Administrator",
  "permissions": [

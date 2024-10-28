@@ -25,27 +25,6 @@
  ],
  "fields": [
   {
-   "allow_in_quick_entry": 1,
-   "default": "0",
-   "fieldname": "genrate_for_all",
-   "fieldtype": "Check",
-   "label": "Genrate for all"
-  },
-  {
-   "fieldname": "select_company",
-   "fieldtype": "Link",
-   "label": "Select Company",
-   "options": "Company"
-  },
-  {
-   "fieldname": "column_break_izvt",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_jtxd",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "year",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -53,28 +32,33 @@
    "reqd": 1
   },
   {
-   "fieldname": "generated_pay_slips_section",
-   "fieldtype": "Section Break",
-   "label": "Generated Pay Slips"
+   "fieldname": "column_break_izvt",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "generated_pay_slips_tab",
-   "fieldtype": "Tab Break",
-   "label": "Pay Slips",
-   "show_dashboard": 1
+   "fieldname": "select_month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "options": "Select\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+   "reqd": 1
   },
   {
-   "fieldname": "created_pay_slips",
-   "fieldtype": "Table",
-   "label": "Created Pay Slips",
-   "options": "Created Pay Slips"
-  },
-  {
-   "default": "1",
-   "fieldname": "add_pay_slips",
-   "fieldtype": "Check",
+   "fieldname": "month",
+   "fieldtype": "Int",
    "hidden": 1,
-   "label": "Add pay slips"
+   "label": "Month"
+  },
+  {
+   "fieldname": "column_break_jtxd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "0",
+   "fieldname": "genrate_for_all",
+   "fieldtype": "Check",
+   "label": "Genrate for all"
   },
   {
    "default": "0",
@@ -84,10 +68,10 @@
    "label": "Add regenrate button"
   },
   {
-   "fieldname": "month",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Month"
+   "fieldname": "select_company",
+   "fieldtype": "Link",
+   "label": "Select Company",
+   "options": "Company"
   },
   {
    "fetch_from": "select_company.abbr",
@@ -100,6 +84,36 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "select_employee",
+   "fieldtype": "Link",
+   "label": "Select Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "generated_pay_slips_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pay Slips",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "generated_pay_slips_section",
+   "fieldtype": "Section Break",
+   "label": "Generated Pay Slips"
+  },
+  {
+   "default": "1",
+   "fieldname": "add_pay_slips",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Add pay slips"
+  },
+  {
+   "fieldname": "created_pay_slips",
+   "fieldtype": "Table",
+   "label": "Created Pay Slips",
+   "options": "Created Pay Slips"
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -108,27 +122,13 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "select_employee",
-   "fieldtype": "Link",
-   "label": "Select Employee",
-   "options": "Employee"
-  },
-  {
-   "fieldname": "select_month",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Month",
-   "options": "Select\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-26 16:51:45.513012",
+ "modified": "2024-10-28 12:04:17.530608",
  "modified_by": "Administrator",
- "module": "HRMS",
+ "module": "Pinnacle-HRMS",
  "name": "Create Pay Slips",
  "naming_rule": "Expression",
  "owner": "Administrator",
