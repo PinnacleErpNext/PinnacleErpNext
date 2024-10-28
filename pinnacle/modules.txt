@@ -1,5 +1,5 @@
 Pinnacle
 hrms
 Globals
-Pinnacle-HRMS
-Pinnacle-Globals
+PinnacleGlobals
+PinnacleHRMS

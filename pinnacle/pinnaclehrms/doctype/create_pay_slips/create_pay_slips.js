@@ -80,7 +80,7 @@ frappe.ui.form.on("Create Pay Slips", {
 							});
 						}
 						frappe.call({
-							method: "pinnacle.pinnacle_hrms.doctype.regenrate_pay_slips.regenerate_pay_slip",
+							method: "pinnacle.pinnaclehrms.doctype.regenrate_pay_slips.regenerate_pay_slip",
 							args: {
 								selected_year: values.year,
 								selected_month: monthNum,

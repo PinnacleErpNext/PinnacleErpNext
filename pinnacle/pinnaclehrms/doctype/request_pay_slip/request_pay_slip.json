@@ -72,9 +72,9 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-28 12:03:44.945768",
+ "modified": "2024-10-28 12:40:46.953744",
  "modified_by": "Administrator",
- "module": "Pinnacle-HRMS",
+ "module": "PinnacleHRMS",
  "name": "Request Pay Slip",
  "owner": "Administrator",
  "permissions": [
