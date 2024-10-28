@@ -117,7 +117,10 @@ def calculate_monthly_salary(employee_data, total_working_days, holidays, year, 
                     total_absents += 1
         
         total_salary -= total_late_deductions
-        total_salary += sundays_salary + overtime_salary + (len(holidays) * per_day_salary)
+        if actual_working_days > 0:
+            total_salary += sundays_salary + overtime_salary + (len(holidays) * per_day_salary)
+        else:
+            total_salary += sundays_salary + overtime_salary
         
         data["salary_information"] = {
             "basic_salary": basic_salary,

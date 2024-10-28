@@ -1,6 +1,6 @@
 import frappe
 from collections import defaultdict
-from pinnacle.salary_calculation import calculate_monthly_salary
+from pinnacle.hrms.doctype.salary_calculation import calculate_monthly_salary
 
 @frappe.whitelist(allow_guest=True)
 def regenerate_pay_slip(selected_year, selected_month, selected_emp=None, selected_company=None):
@@ -64,6 +64,9 @@ def regenerate_pay_slip(selected_year, selected_month, selected_emp=None, select
 
     # Execute the query
     records = frappe.db.sql(base_query, filters, as_dict=True)
+    
+    if not records:
+        frappe.throw("No records found!")
 
     # Initialize a defaultdict to organize employee records
     emp_records = defaultdict(lambda: {
@@ -100,7 +103,9 @@ def regenerate_pay_slip(selected_year, selected_month, selected_emp=None, select
         else:
             # Add new employee data
             grade = record.get('grade')
-            basic_salary = frappe.db.get_value('Salary Structure Assignment', {'employee': employee_id, 'grade':grade}, ['base'])
+            basic_salary = frappe.db.get_value('Employee Grade', { 'name':grade}, ['default_base_pay'])
+            if not basic_salary:
+                frappe.throw("Set basic salary!")
             emp_records[employee_id] = {
                 "company":record.get('company'),
                 "employee": employee_id,

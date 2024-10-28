@@ -80,14 +80,17 @@ frappe.ui.form.on("Create Pay Slips", {
 							});
 						}
 						frappe.call({
-							method: "pinnacle.regenrate_pay_slips.regenerate_pay_slip",
+							method: "pinnacle.hrms.doctype.regenrate_pay_slips.regenerate_pay_slip",
 							args: {
 								selected_year: values.year,
 								selected_month: monthNum,
 								selected_emp: values.employee,
 							},
 							callback: function (res) {
-								console.log(res);
+								frappe.msgprint("Pay slip created succesfully!")
+							},
+							error: function (err) {
+								console.error("Error:", err);
 							},
 						});
 					}
