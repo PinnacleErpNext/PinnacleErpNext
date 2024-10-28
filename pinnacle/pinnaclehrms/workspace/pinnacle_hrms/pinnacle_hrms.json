@@ -15,7 +15,7 @@
  "label": "Pinnacle-HRMS",
  "link_type": "DocType",
  "links": [],
- "modified": "2024-10-28 12:54:06.269069",
+ "modified": "2024-10-28 13:23:45.223066",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Pinnacle-HRMS",
@@ -24,7 +24,17 @@
  "parent_page": "Pinnacle",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  }
+ ],
  "sequence_id": 39.0,
  "shortcuts": [
   {
