@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2024-10-28 12:51:42.906264",
+ "modified": "2024-10-28 18:25:16.353465",
  "modified_by": "Administrator",
  "module": "PinnacleGlobals",
  "name": "set-defaults",
@@ -12,7 +12,7 @@
  "page_name": "set-defaults",
  "roles": [
   {
-   "role": "Employee"
+   "role": "All"
   }
  ],
  "script": null,
