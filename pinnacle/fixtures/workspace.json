@@ -1,0 +1,54 @@
+[
+ {
+  "app": "Pinnacle",
+  "charts": [],
+  "content": "[{\"id\":\"x7G0b8b2Fp\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Employee Dashboard</span>\",\"col\":12}},{\"id\":\"2xaEyB7lA_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Check In\",\"col\":3}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "support",
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "Employee Dashboard",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2024-10-28 18:27:49.741926",
+  "module": "",
+  "name": "Employee Dashboard",
+  "number_cards": [],
+  "parent_page": "Pinnacle",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "role": "All"
+   },
+   {
+    "role": "Employee"
+   }
+  ],
+  "sequence_id": 41.0,
+  "shortcuts": [
+   {
+    "color": "Grey",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Employee Check In",
+    "link_to": "Employee Checkin",
+    "restrict_to_domain": null,
+    "stats_filter": "[]",
+    "type": "DocType",
+    "url": null
+   }
+  ],
+  "title": "Employee Dashboard",
+  "type": "Workspace"
+ }
+]
