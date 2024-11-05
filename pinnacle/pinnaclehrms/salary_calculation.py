@@ -78,7 +78,7 @@ def calculate_monthly_salary(employee_data, total_working_days, holidays, year, 
                             sundays_salary += 0.75 * per_day_salary
                             sundays += 1
                         else:
-                            quarter_days += 1
+                            three_four_quarter_days += 1
                             total_salary += 0.75 * per_day_salary
                     
                     elif 3.375 <= total_working_hours < 5.625:
@@ -94,7 +94,7 @@ def calculate_monthly_salary(employee_data, total_working_days, holidays, year, 
                             sundays_salary += 0.25 * per_day_salary
                             sundays += 1
                         else:
-                            three_four_quarter_days += 1
+                            quarter_days += 1
                             total_salary += 0.25 * per_day_salary
                     
                    

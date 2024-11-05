@@ -72,7 +72,7 @@ class CreatePaySlips(Document):
                 company = self.select_company
                 base_query += "AND e.company = %s"
                 filters.append(company)
-            else:
+            if self.select_employee:
                 employee = self.select_employee
                 base_query += "AND e.employee = %s"
                 filters.append(employee)
@@ -234,3 +234,4 @@ class CreatePaySlips(Document):
     #         pay_slip = frappe.get_doc("Pay Slips", docname)
             
     #         pay_slip.submit()
+    
