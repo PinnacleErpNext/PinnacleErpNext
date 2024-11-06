@@ -17,7 +17,7 @@ def custom_set_user_info(self, resume=False):
         frappe.local.cookie_manager.set_cookie("system_user", "no")
         if not resume:
             frappe.local.response["message"] = "No App"
-            frappe.local.response["home_page"] = "/app/set-defaults" # sett routes here
+            frappe.local.response["home_page"] = "/app/set-defaults" # set routes here
     else:
         frappe.local.cookie_manager.set_cookie("system_user", "yes")
         if not resume:

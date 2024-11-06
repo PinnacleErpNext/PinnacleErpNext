@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{month}-{year}",
+ "creation": "2024-11-06 12:06:50.075962",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "month",
+  "column_break_byxw",
+  "year",
+  "shift_variation_section",
+  "date",
+  "column_break_lncy",
+  "in_time",
+  "column_break_ipxt",
+  "out_time",
+  "column_break_djdu",
+  "reason",
+  "shift_variation_history_tab",
+  "shift_variations"
+ ],
+ "fields": [
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shift_variation_section",
+   "fieldtype": "Section Break",
+   "label": "Shift Variation"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "in_time",
+   "fieldtype": "Time",
+   "label": "In Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "out_time",
+   "fieldtype": "Time",
+   "label": "Out Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Data",
+   "label": "Reason",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shift_variation_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Shift Variation History"
+  },
+  {
+   "fieldname": "shift_variations",
+   "fieldtype": "Table",
+   "label": "Shift Variations",
+   "options": "Shift Variation History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_byxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lncy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ipxt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_djdu",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-06 12:24:14.472894",
+ "modified_by": "Administrator",
+ "module": "PinnacleHRMS",
+ "name": "Shift Variation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
