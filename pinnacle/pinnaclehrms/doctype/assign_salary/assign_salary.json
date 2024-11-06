@@ -10,14 +10,10 @@
   "employee_id",
   "column_break_pomk",
   "employee_name",
-  "salary_details_section",
-  "new_salary",
-  "column_break_0whd",
-  "from_date",
   "overtime_salary_details_section",
   "eligible_for_overtime_salary",
   "overtime_threshold",
-  "salary_history_tab",
+  "paid_leaves",
   "salary_history",
   "amended_from"
  ],
@@ -41,8 +37,7 @@
    "fieldname": "salary_history",
    "fieldtype": "Table",
    "label": "Salary History",
-   "options": "Salary History",
-   "read_only": 1
+   "options": "Salary History"
   },
   {
    "fieldname": "column_break_pomk",
@@ -64,37 +59,8 @@
    "search_index": 1
   },
   {
-   "fieldname": "salary_history_tab",
-   "fieldtype": "Tab Break",
-   "label": "Salary History"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "new_salary",
-   "fieldtype": "Currency",
-   "label": "New Salary",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_0whd",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "salary_details_section",
-   "fieldtype": "Section Break",
-   "label": "Salary Details"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "from_date",
-   "fieldtype": "Date",
-   "label": "From",
-   "reqd": 1
-  },
-  {
    "fieldname": "overtime_salary_details_section",
-   "fieldtype": "Section Break",
-   "label": "Overtime Salary Details"
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -107,11 +73,16 @@
    "fieldname": "overtime_threshold",
    "fieldtype": "Duration",
    "label": "Overtime threshold"
+  },
+  {
+   "fieldname": "paid_leaves",
+   "fieldtype": "Duration",
+   "label": "Paid Leaves"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-06 12:12:20.437073",
+ "modified": "2024-11-06 13:21:14.887016",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Assign Salary",
