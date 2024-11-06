@@ -20,6 +20,7 @@ class CreatePaySlips(Document):
         year = self.year
         month = int(self.month)
         
+        date = f"{year}-{month:02d}-01"
         
         holidays = frappe.db.sql("""
                                 SELECT holiday_date FROM tabHoliday 
@@ -105,7 +106,19 @@ class CreatePaySlips(Document):
                 pan_number, date_of_joining, grade, attendance_device_id, shift,
                 attendance_date, in_time, out_time
             ) = record
-            basic_salary = frappe.db.get_value('Employee Grade', { 'name':grade}, ['default_base_pay'])
+            basic_salary = frappe.db.sql("""
+                                        SELECT tsh.salary 
+                                        FROM `tabSalary History` AS tsh
+                                        JOIN `tabAssign Salary` AS tas ON tsh.parent = tas.name
+                                        WHERE tas.employee_id = %s
+                                        AND tsh.from_date <= %s
+                                        ORDER BY tsh.from_date DESC 
+                                        LIMIT 1
+                                    """, (employee_id,date), as_dict=False)
+
+            # Extract the salary value if the result is not empty
+            basic_salary = basic_salary[0][0] if basic_salary else None
+
             if emp_records[employee_id]["employee"]:
                 # Employee already exists, append to attendance_records
                 emp_records[employee_id]["attendance_records"].append({
@@ -141,8 +154,8 @@ class CreatePaySlips(Document):
         # frappe.throw(str(dict(emp_records)))
         employee_data = calculate_monthly_salary(emp_records, working_days,holidays,year,month)
         # Create pay slips and save them
-        # frappe.throw(str(dict(employee_data)))
-        self.create_pay_slips(employee_data,month,year)
+        frappe.throw(str(dict(employee_data)))
+        # self.create_pay_slips(employee_data,month,year)
 
     def create_pay_slips(self, employee_data, month, year):
         for emp_id, data in employee_data.items():
