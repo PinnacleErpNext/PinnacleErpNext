@@ -1,7 +1,7 @@
 {
  "app": "erpnext",
  "charts": [],
- "content": "[{\"id\":\"wscLEhwVXj\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Pinnacle-HRMS</span>\",\"col\":12}},{\"id\":\"ZfNdXmLiVc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pay Slip Report\",\"col\":4}},{\"id\":\"7bYPxWajJ1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Pay Slip\",\"col\":4}},{\"id\":\"5w__4zXu2O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pay Slip List\",\"col\":4}}]",
+ "content": "[{\"id\":\"wscLEhwVXj\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Pinnacle-HRMS</span>\",\"col\":12}},{\"id\":\"ZfNdXmLiVc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pay Slip Report\",\"col\":4}},{\"id\":\"7bYPxWajJ1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Pay Slip\",\"col\":4}},{\"id\":\"5w__4zXu2O\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pay Slip List\",\"col\":4}},{\"id\":\"O5ox460DBX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Pay Slip Requests\",\"col\":4}}]",
  "creation": "2024-10-26 18:22:19.683512",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,7 +15,7 @@
  "label": "Pinnacle-HRMS",
  "link_type": "DocType",
  "links": [],
- "modified": "2024-10-28 13:23:45.223066",
+ "modified": "2024-11-05 17:03:53.367793",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Pinnacle-HRMS",
@@ -43,6 +43,14 @@
    "label": "Pay Slip Report",
    "link_to": "pay-slip-report",
    "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Pay Slip Requests",
+   "link_to": "Request Pay Slip",
+   "stats_filter": "[]",
+   "type": "DocType"
   },
   {
    "color": "Grey",

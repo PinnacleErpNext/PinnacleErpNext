@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:ASS-SAL-{employee_id}",
+ "creation": "2024-11-06 10:46:44.085695",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_details_section",
+  "employee_id",
+  "column_break_pomk",
+  "employee_name",
+  "salary_details_section",
+  "new_salary",
+  "column_break_0whd",
+  "from_date",
+  "overtime_salary_details_section",
+  "eligible_for_overtime_salary",
+  "overtime_threshold",
+  "salary_history_tab",
+  "salary_history",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Id",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee_id.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_history",
+   "fieldtype": "Table",
+   "label": "Salary History",
+   "options": "Salary History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pomk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Assign Salary",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "salary_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Salary History"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "new_salary",
+   "fieldtype": "Currency",
+   "label": "New Salary",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_0whd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "overtime_salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Overtime Salary Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_overtime_salary",
+   "fieldtype": "Check",
+   "label": "Eligible For Overtime Salary"
+  },
+  {
+   "depends_on": "eligible_for_overtime_salary",
+   "fieldname": "overtime_threshold",
+   "fieldtype": "Duration",
+   "label": "Overtime threshold"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-06 12:12:20.437073",
+ "modified_by": "Administrator",
+ "module": "PinnacleHRMS",
+ "name": "Assign Salary",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
