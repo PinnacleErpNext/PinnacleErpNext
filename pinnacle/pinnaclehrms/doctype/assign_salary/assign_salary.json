@@ -72,7 +72,8 @@
    "depends_on": "eligible_for_overtime_salary",
    "fieldname": "overtime_threshold",
    "fieldtype": "Duration",
-   "label": "Overtime threshold"
+   "label": "Overtime threshold",
+   "mandatory_depends_on": "eligible_for_overtime_salary"
   },
   {
    "fieldname": "paid_leaves",
@@ -82,7 +83,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-06 13:21:14.887016",
+ "modified": "2024-11-07 12:02:35.645206",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Assign Salary",

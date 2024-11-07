@@ -31,16 +31,16 @@ class CreatePaySlips(Document):
         if month == 2:
             # Check for leap year
             if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):
-                working_days = 29
+                workingDays = 29
             else:
-                working_days = 28
+                workingDays = 28
         elif month in [4, 6, 9, 11]:
-            working_days = 30
+            workingDays = 30
         else:
-            working_days = 31
+            workingDays = 31
         
         # Construct the base query
-        base_query = """
+        baseQuery = """
             SELECT
                 e.company,
                 e.employee,
@@ -50,7 +50,6 @@ class CreatePaySlips(Document):
                 e.department,
                 e.pan_number,
                 e.date_of_joining,
-                e.grade,
                 e.attendance_device_id,
                 e.default_shift,
                 a.attendance_date,
@@ -71,20 +70,20 @@ class CreatePaySlips(Document):
         
             if self.select_company:
                 company = self.select_company
-                base_query += "AND e.company = %s"
+                baseQuery += "AND e.company = %s"
                 filters.append(company)
             if self.select_employee:
                 employee = self.select_employee
-                base_query += "AND e.employee = %s"
+                baseQuery += "AND e.employee = %s"
                 filters.append(employee)
               
-        records = frappe.db.sql(base_query, filters, as_dict=False)
+        records = frappe.db.sql(baseQuery, filters, as_dict=False)
         
         if not records:
             return frappe.throw("No records found!")
         
         # Initialize a defaultdict to organize employee records
-        emp_records = defaultdict(lambda: {
+        empRecords = defaultdict(lambda: {
             "company":"",
             "employee": "",
             "employee_name": "",
@@ -103,25 +102,26 @@ class CreatePaySlips(Document):
         for record in records:
             (
                 company,employee_id, employee_name, personal_email, designation, department,
-                pan_number, date_of_joining, grade, attendance_device_id, shift,
+                pan_number, date_of_joining, attendance_device_id, shift,
                 attendance_date, in_time, out_time
             ) = record
-            basic_salary = frappe.db.sql("""
-                                        SELECT tsh.salary 
+            salaryData = frappe.db.sql("""
+                                        SELECT tsh.salary, tas.eligible_for_overtime_salary
                                         FROM `tabSalary History` AS tsh
                                         JOIN `tabAssign Salary` AS tas ON tsh.parent = tas.name
                                         WHERE tas.employee_id = %s
                                         AND tsh.from_date <= %s
                                         ORDER BY tsh.from_date DESC 
                                         LIMIT 1
-                                    """, (employee_id,date), as_dict=False)
+                                    """, (employee_id,date), as_dict=True)
 
             # Extract the salary value if the result is not empty
-            basic_salary = basic_salary[0][0] if basic_salary else None
+            basicSalary = salaryData[0].salary
+            isOvertime = salaryData[0].eligible_for_overtime_salary
 
-            if emp_records[employee_id]["employee"]:
+            if empRecords[employee_id]["employee"]:
                 # Employee already exists, append to attendance_records
-                emp_records[employee_id]["attendance_records"].append({
+                empRecords[employee_id]["attendance_records"].append({
                     "attendance_date": attendance_date,
                     "shift":shift,
                     "in_time": in_time,
@@ -129,7 +129,7 @@ class CreatePaySlips(Document):
                 })
             else:
                 # Add new employee data
-                emp_records[employee_id] = {
+                empRecords[employee_id] = {
                     "company":company,
                     "employee": employee_id,
                     "employee_name": employee_name,
@@ -138,7 +138,8 @@ class CreatePaySlips(Document):
                     "department": department,
                     "pan_number": pan_number,
                     "date_of_joining": date_of_joining,
-                    "basic_salary": basic_salary,
+                    "basic_salary": basicSalary,
+                    "is_overtime":isOvertime,
                     "attendance_device_id": attendance_device_id,
                     "shift":shift,
                     "attendance_records": [{
@@ -152,23 +153,23 @@ class CreatePaySlips(Document):
         
         # Calculate monthly salary for each employe
         # frappe.throw(str(dict(emp_records)))
-        employee_data = calculate_monthly_salary(emp_records, working_days,holidays,year,month)
+        employeeData = calculate_monthly_salary(empRecords, workingDays,holidays,year,month)
         # Create pay slips and save them
-        frappe.throw(str(dict(employee_data)))
-        # self.create_pay_slips(employee_data,month,year)
+        # frappe.throw(str(dict(employeeData)))
+        self.create_pay_slips(employeeData,month,year)
 
-    def create_pay_slips(self, employee_data, month, year):
-        for emp_id, data in employee_data.items():
-            salary_info = data.get("salary_information", {})
+    def create_pay_slips(self, employeeData, month, year):
+        for emp_id, data in employeeData.items():
+            salaryInfo = data.get("salary_information", {})
             
-            full_day_working_amount = round((salary_info.get("full_days", 0) * salary_info.get("per_day_salary", 0)), 2)
-            quarter_day_working_amount = round((salary_info.get("quarter_days", 0) * salary_info.get("per_day_salary", 0) * .75), 2)
-            half_day_working_amount = round((salary_info.get("half_days", 0) * .5 * salary_info.get("per_day_salary", 0)), 2)
-            three_four_quarter_days_working_amount = round((salary_info.get("three_four_quarter_days", 0) * .25 * salary_info.get("per_day_salary", 0)), 2)
-            lates_amount = round((salary_info.get("lates", 0) * salary_info.get("per_day_salary", 0) * .1), 2)
-            other_earnings_amount = round((salary_info.get("overtime", 0)), 2) + salary_info.get("holidays")
+            fullDayWorkingAmount = round((salaryInfo.get("full_days", 0) * salaryInfo.get("per_day_salary", 0)), 2)
+            quarterDayWorkingAmount = round((salaryInfo.get("quarter_days", 0) * salaryInfo.get("per_day_salary", 0) * .75), 2)
+            halfDayWorkingAmount = round((salaryInfo.get("half_days", 0) * .5 * salaryInfo.get("per_day_salary", 0)), 2)
+            threeFourQuarterDaysWorkingAmount = round((salaryInfo.get("three_four_quarter_days", 0) * .25 * salaryInfo.get("per_day_salary", 0)), 2)
+            latesAmount = round((salaryInfo.get("lates", 0) * salaryInfo.get("per_day_salary", 0) * .1), 2)
+            otherEarningsAmount = round((salaryInfo.get("overtime", 0)), 2) + salaryInfo.get("holidays")
             
-            month_mapping = {
+            monthMapping = {
                 1: "January",
                 2: "February",
                 3: "March",
@@ -182,14 +183,14 @@ class CreatePaySlips(Document):
                 11: "November",
                 12: "December"
             }
-            month_name = month_mapping.get(month)
+            monthName = monthMapping.get(month)
 
             # Create a new Pay Slip document
             new_doc = frappe.get_doc({
                 'doctype': 'Pay Slips',
                 'docstatus': 0,
                 'year': year,
-                'month': month_name,
+                'month': monthName,
                 'month_num':month,
                 'company': data.get("company"),
                 'employee_id': data.get("employee"),
@@ -201,33 +202,33 @@ class CreatePaySlips(Document):
                 'date_of_joining': data.get("date_of_joining"),
                 'attendance_device_id': data.get("attendance_device_id"),
                 'basic_salary': data.get("basic_salary"),
-                'per_day_salary': salary_info.get("per_day_salary"),
-                'standard_working_days': salary_info.get("standard_working_days"),
-                'full_day_working_days': salary_info.get("full_days"),
-                "full_days_working_rate": salary_info.get("per_day_salary"),
-                "full_day_working_amount": full_day_working_amount,
-                'quarter_day_working_days': salary_info.get("quarter_days"),
-                'quarter_day_working_rate': salary_info.get("per_day_salary"),
-                'quarter_day_working_amount': quarter_day_working_amount,
-                'half_day_working_days': salary_info.get("half_days"),
-                'half_day_working_rate': salary_info.get("per_day_salary"),
-                'half_day_working_amount': half_day_working_amount,
-                'three_four_quarter_days_working_days': salary_info.get("three_four_quarter_days"),
-                'three_four_quarter_days_rate': salary_info.get("per_day_salary"),
-                'three_four_quarter_days_working_amount': three_four_quarter_days_working_amount,
-                'lates_days': salary_info.get("lates"),
-                'lates_rate': salary_info.get("per_day_salary"),
-                'lates_amount': lates_amount,
-                'absent': salary_info.get("absent"),
-                'sundays_working_days': salary_info.get("sundays_working_days"),
-                'sunday_working_amount': salary_info.get("sundays_salary"),
-                'sunday_working_rate':salary_info.get("per_day_salary"),
-                'actual_working_days': salary_info.get("actual_working_days"),
-                'net_payble_amount': salary_info.get("total_salary"),
-                'other_earnings_overtime': salary_info.get("overtime"),
-                'other_earnings_amount': other_earnings_amount,
-                'total': round(((full_day_working_amount + quarter_day_working_amount + half_day_working_amount + three_four_quarter_days_working_amount) - lates_amount), 2),
-                'other_ernings_holidays_amount': salary_info.get("holidays"),
+                'per_day_salary': salaryInfo.get("per_day_salary"),
+                'standard_working_days': salaryInfo.get("standard_working_days"),
+                'full_day_working_days': salaryInfo.get("full_days"),
+                "full_days_working_rate": salaryInfo.get("per_day_salary"),
+                "full_day_working_amount": fullDayWorkingAmount,
+                'quarter_day_working_days': salaryInfo.get("quarter_days"),
+                'quarter_day_working_rate': salaryInfo.get("per_day_salary"),
+                'quarter_day_working_amount': quarterDayWorkingAmount,
+                'half_day_working_days': salaryInfo.get("half_days"),
+                'half_day_working_rate': salaryInfo.get("per_day_salary"),
+                'half_day_working_amount': halfDayWorkingAmount,
+                'three_four_quarter_days_working_days': salaryInfo.get("three_four_quarter_days"),
+                'three_four_quarter_days_rate': salaryInfo.get("per_day_salary"),
+                'three_four_quarter_days_working_amount': threeFourQuarterDaysWorkingAmount,
+                'lates_days': salaryInfo.get("lates"),
+                'lates_rate': salaryInfo.get("per_day_salary"),
+                'lates_amount': latesAmount,
+                'absent': salaryInfo.get("absent"),
+                'sundays_working_days': salaryInfo.get("sundays_working_days"),
+                'sunday_working_amount': salaryInfo.get("sundays_salary"),
+                'sunday_working_rate':salaryInfo.get("per_day_salary"),
+                'actual_working_days': salaryInfo.get("actual_working_days"),
+                'net_payble_amount': salaryInfo.get("total_salary"),
+                'other_ernings_overtime_amount': salaryInfo.get("overtime"),
+                'other_earnings_amount': otherEarningsAmount,
+                'total': round(((fullDayWorkingAmount + quarterDayWorkingAmount + halfDayWorkingAmount + threeFourQuarterDaysWorkingAmount) - latesAmount), 2),
+                'other_ernings_holidays_amount': salaryInfo.get("holidays"),
             })
             
             # Insert the new document to save it in the database

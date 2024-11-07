@@ -89,12 +89,12 @@
   "sunday_working_amount",
   "other_earnings_section",
   "other_earnings_incentives",
-  "column_break_euil",
-  "other_earning_project_deadline_allowance",
   "column_break_fcpa",
   "other_earnings_special_incentives",
   "column_break_lm7i",
   "other_earnings_leave_encashent",
+  "other_ernings_overtime_amount_cl_brake",
+  "other_ernings_overtime_amount",
   "column_break_buem",
   "other_ernings_holidays_amount",
   "column_break_cgrd",
@@ -543,16 +543,6 @@
    "label": "Incentives"
   },
   {
-   "fieldname": "column_break_euil",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "other_earning_project_deadline_allowance",
-   "fieldtype": "Currency",
-   "label": "Project Deadline Allowance"
-  },
-  {
    "fieldname": "column_break_fcpa",
    "fieldtype": "Column Break"
   },
@@ -623,11 +613,20 @@
    "fieldname": "net_payble_amount",
    "fieldtype": "Currency",
    "label": "Total Monthly Salary + Sundays Working + Other Earnings - Adjustments"
+  },
+  {
+   "fieldname": "other_ernings_overtime_amount",
+   "fieldtype": "Currency",
+   "label": "Overtime Amount"
+  },
+  {
+   "fieldname": "other_ernings_overtime_amount_cl_brake",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-28 12:41:42.817141",
+ "modified": "2024-11-07 15:44:13.214855",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Pay Slips",
