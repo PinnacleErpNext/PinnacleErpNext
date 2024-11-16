@@ -15,42 +15,54 @@ frappe.ui.form.on("Create Pay Slips", {
 		}
 		if (frm.doc.add_regenrate_button) {
 			frm.add_custom_button("Regenerate Pay Slip", () => {
-				frappe.prompt(
-					[
+				let details = new frappe.ui.Dialog({
+					title: "Enter details",
+					fields: [
 						{
-							label: "Select Year",
+							label: "Year",
 							fieldname: "year",
 							fieldtype: "Data",
-							default: frm.doc.year,
+							reqd: true,
 						},
 						{
-							label: "Select Month",
+							label: "Month",
 							fieldname: "month",
 							fieldtype: "Select",
-							options: [
-								"Select",
-								"January",
-								"February",
-								"March",
-								"April",
-								"May",
-								"June",
-								"July",
-								"August",
-								"September",
-								"October",
-								"November",
-								"December",
-							],
+							options:
+								"\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+							reqd: true,
 						},
 						{
-							label: "Select Employee",
-							fieldname: "employee",
+							label: "Company",
+							fieldname: "select_company",
+							fieldtype: "Link",
+							options: "Company",
+						},
+						{
+							label: "Employee",
+							fieldname: "select_employee",
 							fieldtype: "Link",
 							options: "Employee",
 						},
+						{
+							label: "Allowed Lates",
+							fieldname: "allowed_lates",
+							fieldtype: "Int",
+							default: 3,
+							reqd: true,
+						},
+						{
+							label: "Auto Calculate Leave Encashment",
+							fieldname: "auto_calculate_leave_encashment",
+							default: 0,
+							fieldtype: "Check",
+						},
 					],
-					(values) => {
+					primary_action_label: "Submit",
+					primary_action(values) {
+						const monthName =
+							values.month.charAt(0).toUpperCase() +
+							values.month.slice(1).toLowerCase();
 						const months = {
 							January: 1,
 							February: 2,
@@ -66,35 +78,30 @@ frappe.ui.form.on("Create Pay Slips", {
 							December: 12,
 						};
 
-						let monthNum = months[values.month];
+						values.month = months[monthName];
 
-						const currentDate = new Date();
-						const currentMonth = currentDate.getMonth() + 1;
-
-						if (monthNum && currentMonth < monthNum) {
-							frappe.validated = false;
-							frappe.throw({
-								message: "Pay Slips cannot be generated for future months!",
-								title: "Error",
-								indicator: "red",
-							});
+						if (!values.month) {
+							frappe.msgprint("Invalid month name.");
+							return;
 						}
+
+						// Call the server-side method
 						frappe.call({
-							method: "pinnacle.pinnaclehrms.doctype.regenrate_pay_slips.regenerate_pay_slip",
-							args: {
-								selected_year: values.year,
-								selected_month: monthNum,
-								selected_emp: values.employee,
-							},
+							method: "pinnacle.api.regeneratePaySlip",
+							args: { data: values },
 							callback: function (res) {
-								frappe.msgprint("Pay slip created succesfully!");
-							},
-							error: function (err) {
-								console.error("Error:", err);
+								if (res.message === "Success") {
+									frm.reload_doc(); // Reload the current document
+								}
 							},
 						});
-					}
-				);
+
+						details.hide(); // Hide the dialog after submission
+					},
+				});
+
+				// Show the dialog
+				details.show();
 			});
 		}
 	},

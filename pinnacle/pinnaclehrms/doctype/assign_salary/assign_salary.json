@@ -12,7 +12,6 @@
   "employee_name",
   "overtime_salary_details_section",
   "eligible_for_overtime_salary",
-  "overtime_threshold",
   "paid_leaves",
   "salary_history",
   "amended_from"
@@ -69,13 +68,6 @@
    "label": "Eligible For Overtime Salary"
   },
   {
-   "depends_on": "eligible_for_overtime_salary",
-   "fieldname": "overtime_threshold",
-   "fieldtype": "Duration",
-   "label": "Overtime threshold",
-   "mandatory_depends_on": "eligible_for_overtime_salary"
-  },
-  {
    "fieldname": "paid_leaves",
    "fieldtype": "Duration",
    "label": "Paid Leaves"
@@ -83,7 +75,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 12:02:35.645206",
+ "modified": "2024-11-11 15:49:27.453092",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Assign Salary",
@@ -99,6 +91,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
    "share": 1,
    "write": 1
   }

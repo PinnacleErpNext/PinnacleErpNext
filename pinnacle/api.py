@@ -8,8 +8,7 @@ from collections import defaultdict
 from frappe.core.doctype.communication.email import make
 import frappe.utils
 import frappe.utils.print_format
-from pinnacle.pinnaclehrms.salary_calculation import calculate_monthly_salary
-from pinnacle.pinnaclehrms.doctype.create_pay_slips.create_pay_slips import CreatePaySlips
+from pinnacle.pinnaclehrms.salary_calculator import createPaySlips, getEmpRecords, calculateMonthlySalary
 
 # API to get default company and list
 @frappe.whitelist(allow_guest=True)
@@ -233,115 +232,6 @@ def get_pay_slip_report(year=None,month=None, curr_user=None):
         return frappe.msgprint(msg='No records found',title='Warning!')
     return records
 
-# API to approve pay slip request
-@frappe.whitelist(allow_guest=True)
-def approve_pay_slip_req(employee,month,year):
-    
-    self = []
-    if frappe.db.exists("Pay Slips", {'employee_id':employee,'month_num':month,'year':year}):
-        pay_slip = frappe.get_doc("Pay Slips",{'employee_id':employee,'month_num':month,'year':year})
-    else:
-        if month == 2:
-            # Check for leap year
-            if (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):
-                working_days = 29
-            else:
-                working_days = 28
-        elif month in [4, 6, 9, 11]:
-            working_days = 30
-        else:
-            working_days = 31
-            
-        holidays = frappe.db.sql("""SELECT holiday_date FROM tabHoliday WHERE MONTH(holiday_date) = %s AND YEAR(holiday_date) = %s """,(month, year),as_dict=True)
-        base_query = """
-            SELECT
-                e.company,
-                e.employee,
-                e.employee_name,
-                e.personal_email,
-                e.designation,
-                e.department,
-                e.pan_number,
-                e.date_of_joining,
-                e.grade,
-                e.attendance_device_id,
-                e.default_shift,
-                a.attendance_date,
-                a.in_time,
-                a.out_time
-            FROM
-                tabEmployee e
-            JOIN
-                tabAttendance a ON e.employee = a.employee
-            WHERE
-                YEAR(a.attendance_date) = %s AND MONTH(a.attendance_date) = %s AND e.employee = %s
-        """
-        filters = [year, month, employee]
-        records = frappe.db.sql(base_query, filters, as_dict=False)
-        if not records:
-            return frappe.throw("No records found!")
-        
-        # Initialize a defaultdict to organize employee records
-        emp_records = defaultdict(lambda: {
-            "company":"",
-            "employee": "",
-            "employee_name": "",
-            "personal_email": "",
-            "designation": "",
-            "department": "",
-            "pan_number": "",
-            "date_of_joining": "",
-            "basic_salary": 0,
-            "attendance_device_id": "",
-            "attendance_records": [],
-            "salary_information": {}
-        })
-        
-        # Populate employee records from the query results
-        for record in records:
-            (
-                company,employee_id, employee_name, personal_email, designation, department,
-                pan_number, date_of_joining, grade, attendance_device_id, shift,
-                attendance_date, in_time, out_time
-            ) = record
-            basic_salary = frappe.db.get_value('Employee Grade', { 'name':grade}, ['default_base_pay'])
-            if emp_records[employee_id]["employee"]:
-                # Employee already exists, append to attendance_records
-                emp_records[employee_id]["attendance_records"].append({
-                    "attendance_date": attendance_date,
-                    "shift":shift,
-                    "in_time": in_time,
-                    "out_time": out_time
-                })
-            else:
-                # Add new employee data
-                emp_records[employee_id] = {
-                    "company":company,
-                    "employee": employee_id,
-                    "employee_name": employee_name,
-                    "personal_email": personal_email,
-                    "designation": designation,
-                    "department": department,
-                    "pan_number": pan_number,
-                    "date_of_joining": date_of_joining,
-                    "basic_salary": basic_salary,
-                    "attendance_device_id": attendance_device_id,
-                    "shift":shift,
-                    "attendance_records": [{
-                        "attendance_date": attendance_date,
-                        "shift":shift,
-                        "in_time": in_time,
-                        "out_time": out_time
-                    }],
-                    "salary_information": {}
-                }
-        
-        # Calculate monthly salary for each employe
-        employee_data = calculate_monthly_salary(emp_records, working_days,holidays)
-        # Create pay slips and save them
-        # frappe.msgprint(str(dict(employee_data)))
-        CreatePaySlips.create_pay_slips(self,employee_data,month,year)
-        pay_slip = frappe.get_doc("Pay Slips",{'employee_id':employee,'month_num':month,'year':year})
     
     employee_name = pay_slip.employee_name
     month = pay_slip.month
@@ -395,7 +285,173 @@ def get_pay_slip_request(date=None,requested_by=None):
 #API to print pay slip
 @frappe.whitelist(allow_guest=True)
 def print_pay_slip(pay_slips):
-    return frappe.msgprint("Coming Soon!")
+    # return frappe.msgprint("Coming Soon!")
     pay_slips = json.loads(pay_slips)
     for pay_slip in pay_slips:
         frappe.utils.print_format.download_pdf('Pay Slips', pay_slip, format='Pay Slip Format')
+
+#API get pay slip requests
+@frappe.whitelist(allow_guest=True)
+def getPaySlipRequests():
+    records = frappe.db.get_all(
+    "Request Pay Slip", 
+    fields=["name", "requested_date", "employee", "year", "month", "status"],
+    filters={"status": "Requested"},
+    order_by="creation desc"
+)
+
+    return records
+
+# API to approve pay slip request
+@frappe.whitelist(allow_guest=True)
+def approvePaySlipRequest(data):
+    data = json.loads(data)
+    
+    # Check if a Pay Slip exists for the given employee, month, and year
+    if frappe.db.exists("Pay Slips", {
+        'employee_id': data['select_employee'],
+        'month_num': data['month'],
+        'year': data['year']
+    }):
+        # Fetch the Pay Slip document
+        paySlip = frappe.get_doc("Pay Slips", {
+            'employee_id': data['select_employee'],
+            'month_num': data['month'],
+            'year': data['year']
+        })
+    else:
+       createPaySlips(data)
+       paySlip = frappe.get_doc("Pay Slips", {
+            'employee_id': data['select_employee'],
+            'month_num': data['month'],
+            'year': data['year']
+        })
+    
+    employee_name = paySlip.employee_name
+    month = paySlip.month
+    year = paySlip.year
+    doctype = paySlip.doctype
+    docname = paySlip.name
+    personal_email = paySlip.personal_email
+    subject = f"Pay Slip for {employee_name} - {month} {year}"
+    message = f"""
+    Dear {employee_name},
+    Please find attached your pay slip for {month} {year}.
+    Best regards,
+    Your Company
+    """
+    pdf_attachment = frappe.attach_print(doctype, docname, file_name=f"Pay Slip {docname}")
+    
+    if personal_email:
+        frappe.sendmail(
+            recipients=[personal_email],
+            subject=subject,
+            message=message,
+            attachments=[{
+                'fname': f"Pay Slip - {employee_name}.pdf",
+                'fcontent': pdf_attachment
+            }],
+        )
+        return {"message": _("Success")}
+    else:
+        frappe.throw(f"No email address found for employee {employee_name}")
+
+# API to regenerate pay slip
+@frappe.whitelist(allow_guest=True)
+def regeneratePaySlip(data):
+    
+    data = json.loads(data)
+    year = data.get('year')
+    month = data.get('month')
+    
+    empRecords = getEmpRecords(data)
+    employeeData = calculateMonthlySalary(empRecords,year,month)
+    
+    for emp_id, data in employeeData.items():
+        
+        month_mapping = {
+                1: "January",
+                2: "February",
+                3: "March",
+                4: "April",
+                5: "May",
+                6: "June",
+                7: "July",
+                8: "August",
+                9: "September",
+                10: "October",
+                11: "November",
+                12: "December"
+            }
+        month_name = month_mapping.get(month)
+        
+        salary_info = data.get("salary_information", {})
+        
+        full_day_working_amount = round((salary_info.get("full_days", 0) * salary_info.get("per_day_salary", 0)), 2)
+        quarter_day_working_amount = round((salary_info.get("quarter_days", 0) * salary_info.get("per_day_salary", 0) * .75), 2)
+        half_day_working_amount = round((salary_info.get("half_days", 0) * .5 * salary_info.get("per_day_salary", 0)), 2)
+        three_four_quarter_days_working_amount = round((salary_info.get("three_four_quarter_days", 0) * .25 * salary_info.get("per_day_salary", 0)), 2)
+        lates_amount = round((salary_info.get("lates", 0) * salary_info.get("per_day_salary", 0) * .1), 2)
+        other_earnings_amount = round((salary_info.get("overtime", 0)), 2) + salary_info.get("holidays")
+        
+        # Check if a Pay Slip already exists for the employee
+        existing_doc = frappe.get_all('Pay Slips', filters={
+            'employee_id': data.get("employee"),
+            'docstatus': 0  # Check for open or draft status
+        }, fields=['name'])
+
+        if existing_doc:
+            # If a Pay Slip exists, update it
+            pay_slip = frappe.get_doc('Pay Slips', existing_doc[0]['name'])
+        else:
+            # If no Pay Slip exists, create a new one
+            pay_slip = frappe.new_doc('Pay Slips')
+            
+        
+        # Update the fields
+        pay_slip.update({
+          'year': year,
+          'month': month_name,
+          'company': data.get("company"),
+          'employee_id': data.get("employee"),
+          'employee_name': data.get("employee_name"),
+          'personal_email': data.get("personal_email"),
+          'designation': data.get("designation"),
+          'department': data.get("department"),
+          'pan_number': data.get("pan_number"),
+          'date_of_joining': data.get("date_of_joining"),
+          'attendance_device_id': data.get("attendance_device_id"),
+          'basic_salary': data.get("basic_salary"),
+          'per_day_salary': salary_info.get("per_day_salary"),
+          'standard_working_days': salary_info.get("standard_working_days"),
+          'full_day_working_days': salary_info.get("full_days"),
+          "full_days_working_rate": salary_info.get("per_day_salary"),
+          "full_day_working_amount": full_day_working_amount,
+          'quarter_day_working_days': salary_info.get("quarter_days"),
+          'quarter_day_working_rate': salary_info.get("per_day_salary"),
+          'quarter_day_working_amount': quarter_day_working_amount,
+          'half_day_working_days': salary_info.get("half_days"),
+          'half_day_working_rate': salary_info.get("per_day_salary"),
+          'half_day_working_amount': half_day_working_amount,
+          'three_four_quarter_days_working_days': salary_info.get("three_four_quarter_days"),
+          'three_four_quarter_days_rate': salary_info.get("per_day_salary"),
+          'three_four_quarter_days_working_amount': three_four_quarter_days_working_amount,
+          'lates_days': salary_info.get("lates"),
+          'lates_rate': salary_info.get("per_day_salary"),
+          'lates_amount': lates_amount,
+          'absent': salary_info.get("absent"),
+          'sundays_working_days': salary_info.get("sundays_working_days"),
+          'sunday_working_amount': salary_info.get("sundays_salry"),
+          'sunday_working_rate':salary_info.get("per_day_salary"),
+          'actual_working_days': salary_info.get("actual_working_days"),
+          'net_payble_amount': salary_info.get("total_salary"),
+          'other_earnings_overtime': salary_info.get("overtime"),
+          'other_earnings_amount': other_earnings_amount,
+          'other_ernings_holidays_amount': salary_info.get("holidays"),
+          'total': round(((full_day_working_amount + quarter_day_working_amount + half_day_working_amount + three_four_quarter_days_working_amount) - lates_amount), 2),
+        })
+        
+        # Save or submit the document
+        pay_slip.save()
+        
+        return {"message": _("Success")}

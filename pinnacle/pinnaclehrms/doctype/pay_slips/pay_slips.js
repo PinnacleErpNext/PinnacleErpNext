@@ -21,6 +21,13 @@ frappe.ui.form.on("Pay Slips", {
 		);
 		calculate_gross(frm);
 	},
+	early_checkout_working_days: function (frm) {
+		frm.set_value(
+			"early_checkout_working_amount",
+			frm.doc.early_checkout_working_days * frm.doc.early_checkout_working_rate * 0.9
+		);
+		calculate_gross(frm);
+	},
 	quarter_day_working_days: function (frm) {
 		frm.set_value(
 			"quarter_day_working_amount",
@@ -88,7 +95,7 @@ frappe.ui.form.on("Pay Slips", {
 	other_earnings_amount: function (frm) {
 		calculate_net_payable(frm);
 	},
-	
+
 	adjustments: function (frm) {
 		calculate_net_payable(frm);
 	},
@@ -123,6 +130,7 @@ frappe.ui.form.on("Pay Slips", {
 function calculate_gross(frm) {
 	let total =
 		(frm.doc.full_day_working_amount || 0) +
+		(frm.doc.early_checkout_working_amount || 0) +
 		(frm.doc.quarter_day_working_amount || 0) +
 		(frm.doc.half_day_working_amount || 0) +
 		(frm.doc.three_four_quarter_days_working_amount || 0) -

@@ -10,8 +10,11 @@
   "column_break_izvt",
   "select_month",
   "month",
+  "column_break_ya1i",
+  "allowed_lates",
   "column_break_jtxd",
   "genrate_for_all",
+  "auto_calculate_leave_encashment",
   "add_regenrate_button",
   "select_company",
   "company_abbr",
@@ -122,11 +125,28 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_calculate_leave_encashment",
+   "fieldtype": "Check",
+   "label": "Auto Calculate Leave Encashment"
+  },
+  {
+   "fieldname": "column_break_ya1i",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "fieldname": "allowed_lates",
+   "fieldtype": "Int",
+   "label": "Allowed Lates",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-28 13:19:48.771393",
+ "modified": "2024-11-15 10:52:59.098475",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Create Pay Slips",

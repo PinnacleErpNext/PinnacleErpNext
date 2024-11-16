@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:pay-slip-req-by-{employee}",
  "creation": "2024-10-26 17:01:58.905278",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -72,10 +73,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-28 12:40:46.953744",
+ "modified": "2024-11-11 18:21:42.215657",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Request Pay Slip",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
