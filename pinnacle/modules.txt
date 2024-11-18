@@ -1,3 +1,2 @@
 PinnacleGlobals
 PinnacleHRMS
-Pinnacle
