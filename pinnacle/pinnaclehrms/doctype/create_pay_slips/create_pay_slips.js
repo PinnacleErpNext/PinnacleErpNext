@@ -3,6 +3,13 @@
 var preventSubmission;
 frappe.ui.form.on("Create Pay Slips", {
 	refresh(frm) {
+		if (frm.doc.created_pay_slips) {
+			employeeId = [""];
+			paySlipList = frm.doc.created_pay_slips;
+			paySlipList.forEach((paySlip) => {
+				employeeId.push(paySlip.employee_id);
+			});
+		}
 		add_email_btn(frm);
 		if (frm.genrate_for_all) {
 			frm.set_df_property("select_company", "hidden", 1);
@@ -22,27 +29,32 @@ frappe.ui.form.on("Create Pay Slips", {
 							label: "Year",
 							fieldname: "year",
 							fieldtype: "Data",
+							default: frm.doc.year,
+							read_only: 1,
 							reqd: true,
 						},
 						{
 							label: "Month",
 							fieldname: "month",
-							fieldtype: "Select",
-							options:
-								"\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+							fieldtype: "Data",
+							default: frm.doc.select_month,
+							read_only: 1,
 							reqd: true,
 						},
 						{
 							label: "Company",
 							fieldname: "select_company",
 							fieldtype: "Link",
+							default: frm.doc.select_company,
+							read_only: 1,
 							options: "Company",
 						},
 						{
 							label: "Employee",
 							fieldname: "select_employee",
-							fieldtype: "Link",
-							options: "Employee",
+							fieldtype: "Select",
+							default: frm.doc.select_employee,
+							options: employeeId,
 						},
 						{
 							label: "Allowed Lates",
@@ -90,8 +102,9 @@ frappe.ui.form.on("Create Pay Slips", {
 							method: "pinnacle.api.regeneratePaySlip",
 							args: { data: values },
 							callback: function (res) {
-								if (res.message === "Success") {
-									frm.reload_doc(); // Reload the current document
+								console.log(res.message.message);
+								if (res.message.message === "Success") {
+									frm.reload_doc();
 								}
 							},
 						});
@@ -204,7 +217,10 @@ function createPaySlipList(frm) {
 		method: "pinnacle.api.get_pay_slip_list",
 		args: {
 			month: frm.doc.month,
+			year: frm.doc.year,
 			parent_docname: frm.docname,
+			company: frm.doc.select_company,
+			employee: frm.doc.select_employee,
 		},
 		callback: function (res) {
 			frm.reload_doc();

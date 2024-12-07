@@ -1,18 +1,19 @@
 import frappe
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
-
 def createPaySlips(data):
-        # return frappe.throw(str(data))
+        
         year = data.get('year')
         month = data.get('month')
         
         empRecords = getEmpRecords(data)
         
         employeeData = calculateMonthlySalary(empRecords,year, month)
+        
+        # return frappe.throw(str(dict(employeeData)))
         
         for emp_id, data in employeeData.items():
             if frappe.db.exists("Pay Slips", {'employee_id': data.get("employee"), 'month_num': month, 'year': year}):
@@ -257,6 +258,126 @@ def getEmpRecords(data):
         # frappe.throw(str(dict(emp_records)))
         
         return empRecords
+
+def calculateShiftTimes(attendanceDate, shiftStart, shiftEnd):
+    # Extract hours and minutes from shift start and end
+    startHours, remainder = divmod(shiftStart.seconds, 3600)
+    startMinutes, _ = divmod(remainder, 60)
+    endHours, remainder = divmod(shiftEnd.seconds, 3600)
+    endMinutes, _ = divmod(remainder, 60)
+    
+    # Calculate ideal check-in/out times
+    idealCheckInTime = datetime.combine(attendanceDate, time(startHours, startMinutes))
+    idealCheckOutTime = datetime.combine(attendanceDate, time(endHours, endMinutes))
+    
+    # Define overtime threshold (example: 7:30 PM)
+    overtimeThreshold = datetime.combine(attendanceDate, time(19, 30))
+    
+    # Calculate ideal working hours
+    idealWorkingTime = idealCheckOutTime - idealCheckInTime
+    idealWorkingHours = idealWorkingTime.total_seconds() / 3600
+    
+    return {
+        "idealCheckInTime": idealCheckInTime,
+        "idealCheckOutTime": idealCheckOutTime,
+        "overtimeThreshold": overtimeThreshold,
+        "idealWorkingHours": idealWorkingHours,
+    }
+
+def getShiftDetails(empId, shiftVariationRecord, attendanceDate, attendanceRecord):
+    if shiftVariationRecord:
+        for shiftVariation in shiftVariationRecord:
+            if shiftVariation.get("attendance_date") == attendanceDate:
+                employeeString = shiftVariation.get("employees")
+                if employeeString:
+                    employeesList = employeeString.split(",")
+                    
+                    if empId in employeesList:  # Check if employees are missing or empty
+                        shiftStart = shiftVariation.get("earliest_in_time")
+                        shiftEnd = shiftVariation.get("latest_out_time")
+                        if shiftStart is None or shiftEnd is None:
+                            raise ValueError(f"Shift times missing for attendance date {attendanceDate}")
+                        return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
+                    else:
+                        shift = attendanceRecord.get("shift")
+                        if not shift:
+                            raise ValueError("Shift is missing in attendance record")
+                        
+                        shiftStart = frappe.db.get_value("Shift Type", {"name": shift}, "start_time")
+                        shiftEnd = frappe.db.get_value("Shift Type", {"name": shift}, "end_time")
+                        if shiftStart is None or shiftEnd is None:
+                            raise ValueError(f"Shift details missing for shift {shift}")
+                        return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
+                else:
+                    shiftStart = shiftVariation.get("earliest_in_time")
+                    shiftEnd = shiftVariation.get("latest_out_time")
+                    if shiftStart is None or shiftEnd is None:
+                        raise ValueError(f"Shift times missing for attendance date {attendanceDate}")
+                    return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
+
+        shift = attendanceRecord.get("shift")
+        if not shift:
+            raise ValueError("Shift is missing in attendance record")
+        
+        shiftStart = frappe.db.get_value("Shift Type", {"name": shift}, "start_time")
+        shiftEnd = frappe.db.get_value("Shift Type", {"name": shift}, "end_time")
+        if shiftStart is None or shiftEnd is None:
+            raise ValueError(f"Shift details missing for shift {shift}")
+        return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
+    else:
+        # Fetch shift details directly from attendanceRecord
+        shift = attendanceRecord.get("shift")
+        if not shift:
+            raise ValueError("Shift is missing in attendance record")
+        
+        shiftStart = frappe.db.get_value("Shift Type", {"name": shift}, "start_time")
+        shiftEnd = frappe.db.get_value("Shift Type", {"name": shift}, "end_time")
+        if shiftStart is None or shiftEnd is None:
+            raise ValueError(f"Shift details missing for shift {shift}")
+        return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
+
+def createTimeSlabs(checkInTime, checkOutTime):
+  
+    idealWorkingTime = checkOutTime - checkInTime
+    iwh = idealWorkingTime.total_seconds() / 60
+    
+    slabs = {
+        "check_in": [
+            (checkInTime, checkInTime + timedelta(minutes=round(iwh*0.113)), 0.10),  # 10% deduction
+            (checkInTime + timedelta(minutes=round(iwh*0.113)), checkInTime + timedelta(minutes=round(iwh*0.3351)), 0.25),  # 25% deduction
+            (checkInTime + timedelta(minutes=round(iwh*0.3351)), checkInTime + timedelta(minutes=round(iwh*0.668)), 0.50),  # 50% deduction
+            (checkInTime + timedelta(minutes=round(iwh*0.668)), checkInTime + timedelta(minutes=round(iwh*1)), 0.75),  # 75% deduction
+        ],
+        "check_out": [
+            (checkOutTime - timedelta(minutes=round(iwh*1)), checkOutTime - timedelta(minutes=round(iwh*0.664)), 0.75),  # 75% deduction
+            (checkOutTime - timedelta(minutes=round(iwh*0.664)), checkOutTime - timedelta(minutes=round((iwh*0.331))), 0.50),  # 50% deduction
+            (checkOutTime - timedelta(minutes=round((iwh*0.331))), checkOutTime - timedelta(minutes=round((iwh*0.109))), 0.25),  # 25% deduction
+            (checkOutTime - timedelta(minutes=round((iwh*0.109))), checkOutTime, 0.10),  # 10% deduction
+        ],
+    }
+    
+    return slabs
+
+def calculateDeduction(checkIn, checkOut, slabs):
+    deductionPercentage = 0.0
+
+    # Check which check-in slab applies
+    for start, end, rate in slabs["check_in"]:
+        if start <= checkIn < end:
+            deductionPercentage += rate
+            break
+
+    # Check which check-out slab applies
+    for start, end, rate in slabs["check_out"]:
+        if start < checkOut <= end:
+            deductionPercentage += rate
+            break
+
+    return deductionPercentage
+
+def calculateFinalAmount(perDaySalary, deductionPercentage):
+    
+    return perDaySalary * (1 - deductionPercentage)
         
 def calculateMonthlySalary(employeeData,year, month):
     
@@ -292,6 +413,7 @@ def calculateMonthlySalary(employeeData,year, month):
         actualWorkingDays = 0
         leaveEncashment = 0
         earlyCheckOutDays = 0
+        holidayAmount = 0
         
         basicSalary = data.get("basic_salary", 0)
         attendanceRecords = data.get("attendance_records", [])
@@ -301,16 +423,29 @@ def calculateMonthlySalary(employeeData,year, month):
         holidays = data.get("holidays")
         totalWorkingDays = data.get("working_days")
         
-        shiftVariationRecord = frappe.db.sql("""
-                                    SELECT svh.date AS attendance_date, svh.in_time, svh.out_time
-                                    FROM `tabShift Variation` AS sv
-                                    JOIN `tabShift Variation History` AS svh ON sv.name = svh.parent
-                                    WHERE sv.year = %s AND sv.month_num = %s;
-                                      """, (year, month), as_dict=True)
-        
-        shiftVariation = {
-                            record['attendance_date']: record for record in shiftVariationRecord
-                        }
+        shiftVariationRecord = frappe.db.sql("""SELECT 
+                                                    svh.date AS attendance_date,
+                                                    GROUP_CONCAT(DISTINCT sv.name) AS shift_variation_names,
+                                                    sv.year,
+                                                    sv.month_num,
+                                                    GROUP_CONCAT(DISTINCT sfe.employee) AS employees,
+                                                    MIN(svh.in_time) AS earliest_in_time,
+                                                    MAX(svh.out_time) AS latest_out_time
+                                                FROM 
+                                                    `tabShift Variation` AS sv
+                                                LEFT JOIN 
+                                                    `tabShift Variation History` AS svh 
+                                                    ON sv.name = svh.parent
+                                                LEFT JOIN 
+                                                    `tabShift for Employee` AS sfe 
+                                                    ON sv.name = sfe.parent
+                                                WHERE 
+                                                    sv.year = %s
+                                                    AND sv.month_num = %s
+                                                GROUP BY 
+                                                    svh.date;
+                                            """,(year,month),as_dict = True)
+
         
         dojStr = data.get('date_of_joining')
         doj = datetime.strptime(dojStr, "%Y-%m-%d") if isinstance(dojStr, str) else dojStr
@@ -350,9 +485,23 @@ def calculateMonthlySalary(employeeData,year, month):
                 leaveEncashmentMonths = difference.years * 12 + difference.months
             
             leaveEncashment = ((paidLeaves / 12) * leaveEncashmentMonths) * perDaySalary
-            print(f"Leave Encashment: {leaveEncashment}")
         
         perDaySalary = round(basicSalary / totalWorkingDays, 2)
+        
+        for holidayDate in holidays:
+            holiday = holidayDate["holiday_date"]
+            
+            dayBeforeHoliday = holiday - timedelta(days=1)
+            
+            dayAfterHoliday = holiday + timedelta(days=1)
+            
+            attendance_before = any(attendanceRecord["attendance_date"] == dayBeforeHoliday for attendanceRecord in attendanceRecords)
+            
+            attendance_after = any(attendanceRecord["attendance_date"] == dayAfterHoliday for attendanceRecord in attendanceRecords)
+
+            if attendance_before or attendance_after:
+                holidayAmount += perDaySalary
+                
         
         for day in range(1, totalWorkingDays + 1):
             today = datetime(year, month, day).date()
@@ -360,47 +509,17 @@ def calculateMonthlySalary(employeeData,year, month):
             attendanceRecord = next((record for record in attendanceRecords if record['attendance_date'] == today), None)
             
             attendanceDate = today
-            
+        
             if attendanceRecord:
                 attendanceDate = attendanceRecord["attendance_date"]
                 inTime = attendanceRecord["in_time"]
                 outTime = attendanceRecord["out_time"]
                 
-                if attendanceDate in shiftVariation:
-                    shiftVariationData = shiftVariation[attendanceDate]
-                    shiftStart = shiftVariationData.in_time
-                    shiftEnd = shiftVariationData.out_time
-                    
-                    startHours, remainder = divmod(shiftStart.seconds, 3600)
-                    startMinutes, _ = divmod(remainder, 60)
-                    endHours, remainder = divmod(shiftEnd.seconds, 3600)
-                    endMinutes, _ = divmod(remainder, 60)
-                    
-                    idealCheckInTime = datetime.combine(attendanceDate, time(startHours, startMinutes))
-                    idealCheckOutTime = datetime.combine(attendanceDate, time(endHours, endMinutes))
-                    overtimeThreshold = datetime.combine(attendanceDate, time(19, 30))
-                    
-                    idealWorkingTime = idealCheckOutTime - idealCheckInTime
-                    idealWorkingHours = idealWorkingTime.total_seconds() / 3600
-                    
-                else:
-                    shift = attendanceRecord["shift"]
-                    
-                    
-                    shiftStart = frappe.db.get_value('Shift Type', {"name": shift}, "start_time")
-                    shiftEnd = frappe.db.get_value('Shift Type', {"name": shift}, "end_time")
-                    
-                    startHours, remainder = divmod(shiftStart.seconds, 3600)
-                    startMinutes, _ = divmod(remainder, 60)
-                    endHours, remainder = divmod(shiftEnd.seconds, 3600)
-                    endMinutes, _ = divmod(remainder, 60)
-                    
-                    idealCheckInTime = datetime.combine(attendanceDate, time(startHours, startMinutes))
-                    idealCheckOutTime = datetime.combine(attendanceDate, time(endHours, endMinutes))
-                    overtimeThreshold = datetime.combine(attendanceDate, time(19, 30))
-                    
-                    idealWorkingTime = idealCheckOutTime - idealCheckInTime
-                    idealWorkingHours = idealWorkingTime.total_seconds() / 3600
+                shiftDetails = getShiftDetails(emp_id, shiftVariationRecord, attendanceDate, attendanceRecord)
+                
+                idealCheckInTime = shiftDetails.get("idealCheckInTime")
+                idealCheckOutTime = shiftDetails.get("idealCheckOutTime")
+                overtimeThreshold = shiftDetails.get("overtimeThreshold")
                 
                 if inTime and outTime:
                     checkIn = datetime.combine(attendanceDate, inTime.time())
@@ -409,60 +528,78 @@ def calculateMonthlySalary(employeeData,year, month):
                     totalWorkingTime = checkOut - checkIn
                     totalWorkingHours = round((totalWorkingTime.total_seconds() / 3600),2)
                     
-                    if idealWorkingHours <= totalWorkingHours:
-                        if totalWorkingHours > idealWorkingHours and isOvertime and checkOut > overtimeThreshold:
+                    slabs = createTimeSlabs(idealCheckInTime, idealCheckOutTime)
+                    
+                    if (totalWorkingHours > 3):
+                        deductionPercentage = calculateDeduction(checkIn, checkOut, slabs)
+                        salary = calculateFinalAmount(perDaySalary, deductionPercentage)
+                        # print(attendanceDate,deductionPercentage,salary)
+                        totalSalary += salary
+                        
+                    if checkIn>idealCheckInTime:
+                        if lates<allowedLates :
+                            totalSalary += (perDaySalary*0.1)
+                        lates += 1
+                    
+                    # overtime salary calculation if marked is eligible
+                    if isOvertime and checkOut > overtimeThreshold:
                             extraTime = checkOut - idealCheckOutTime
                             overtime = extraTime.total_seconds() / 60
                             minOvertimeSalary = perDaySalary / 540
                             overtimeSalary = overtime * minOvertimeSalary
+                    
+                    if deductionPercentage == 0:
                         if attendanceDate.weekday() == 6:  
                             sundaysSalary += perDaySalary
                             sundays += 1
+                            actualWorkingDays+=1
                         else:
                             fullDays += 1
-                            totalSalary += perDaySalary
-                    elif (idealWorkingHours * 0.88) <= totalWorkingHours < idealWorkingHours:
-                        if attendanceDate.weekday() == 6:
-                            sundaysSalary += 0.9 * perDaySalary
-                            sundays += 1
+                            actualWorkingDays+=1
+                    elif 0 < deductionPercentage < 0.1:  # Deduction percentage is between 0 and 0.1
+                        if checkIn > idealCheckInTime and idealCheckInTime < datetime.combine(attendanceDate, time(11, 0)):
+                            if attendanceDate.weekday() == 6:  
+                                sundaysSalary += perDaySalary
+                                sundays += 1
+                                actualWorkingDays+=1
+                            else:
+                                lates += 1
+                                actualWorkingDays+=1
                         else:
-                            earlyCheckOutDays += 1
-                            totalSalary += 0.9 * perDaySalary
-                    elif (idealWorkingHours * 0.75) <= totalWorkingHours < (idealWorkingHours * 0.88):
-                        if attendanceDate.weekday() == 6:
-                            sundaysSalary += 0.75 * perDaySalary
+                            if attendanceDate.weekday() == 6:  
+                                sundaysSalary += perDaySalary
+                                sundays += 1
+                                actualWorkingDays+=1
+                            else:
+                                earlyCheckOutDays += 1
+                                actualWorkingDays+=1
+                    elif 0.1 <= deductionPercentage < 0.25:  # Deduction percentage between 0.1 and 0.25
+                        if attendanceDate.weekday() == 6:  
+                            sundaysSalary += perDaySalary
                             sundays += 1
+                            actualWorkingDays+=1
                         else:
                             threeFourQuarterDays += 1
-                            totalSalary += 0.75 * perDaySalary
-                    elif (idealWorkingHours * 0.5) <= totalWorkingHours < (idealWorkingHours * 0.75):
-                        if attendanceDate.weekday() == 6:
-                            sundaysSalary += 0.5 * perDaySalary
+                            actualWorkingDays+=1
+                    elif 0.25 <= deductionPercentage < 0.5:  # Deduction percentage between 0.25 and 0.5
+                        if attendanceDate.weekday() == 6:  
+                            sundaysSalary += perDaySalary
                             sundays += 1
+                            actualWorkingDays+=1
                         else:
                             halfDays += 1
-                            totalSalary += 0.5 * perDaySalary
-                    elif (idealWorkingHours * 0.25) <= totalWorkingHours < (idealWorkingHours * 0.5):
-                        if attendanceDate.weekday() == 6:
-                            sundaysSalary += 0.25 * perDaySalary
+                            actualWorkingDays+=1
+                    elif 0.5 <= deductionPercentage < 0.75:  # Deduction percentage between 0.5 and 0.75
+                        if attendanceDate.weekday() == 6:  
+                            sundaysSalary += perDaySalary
                             sundays += 1
+                            actualWorkingDays+=1
                         else:
                             quarterDays += 1
-                            totalSalary += 0.25 * perDaySalary
-                    elif totalWorkingHours < (idealWorkingHours * 0.25):
-                            if attendanceDate.weekday() == 6:
-                                sundaysSalary += 0.25 * perDaySalary
-                                sundays += 1
-                            else:
-                               totalAbsents += 1
-                   
-                    if checkIn > idealCheckInTime and attendanceDate.weekday() != 6 and (idealWorkingHours * 0.88) <= totalWorkingHours < idealWorkingHours:
-                        lates += 1
-                        lateDeduction = 0.10 * perDaySalary
-                        if lates > allowedLates:
-                            # lates -= lates
-                            totalLateDeductions = lates * lateDeduction
-                    actualWorkingDays += 1
+                            actualWorkingDays+=1
+                    elif 0.75 <= deductionPercentage <= 1:  # Deduction percentage between 0.75 and 1
+                        totalAbsents += 1
+                        actualWorkingDays+=1        
                 else:
                     if any(holiday['holiday_date'] == today for holiday in holidays):
                         pass
@@ -476,7 +613,7 @@ def calculateMonthlySalary(employeeData,year, month):
         
         totalSalary -= totalLateDeductions
         if actualWorkingDays > 0:
-            totalSalary += (sundaysSalary + overtimeSalary + (len(holidays) * perDaySalary) + leaveEncashment)
+            totalSalary += (sundaysSalary + overtimeSalary + holidayAmount + leaveEncashment)
         else:
             totalSalary += (sundaysSalary + overtimeSalary + leaveEncashment)
         
@@ -497,9 +634,8 @@ def calculateMonthlySalary(employeeData,year, month):
             "absent": totalAbsents,
             "lates": lates,
             "overtime": round((overtimeSalary),2),
-            "holidays": round((len(holidays) * perDaySalary), 2),
+            "holidays": holidayAmount,
             "leave_encashment": round((leaveEncashment),2)
         }
     
     return employeeData
-

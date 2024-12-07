@@ -5,7 +5,7 @@ frappe.ui.form.on("Shift Variation", {
 	refresh(frm) {},
 	month(frm) {
 		const monthName = frm.doc.month;
-        
+
 		const months = {
 			January: 1,
 			February: 2,

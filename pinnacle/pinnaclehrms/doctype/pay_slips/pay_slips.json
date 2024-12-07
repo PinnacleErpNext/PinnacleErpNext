@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:pay-slip-{month_num}-{employee_id}",
+ "autoname": "format:pay-slip-{month}-{employee_id}",
  "creation": "2024-10-26 16:42:18.428127",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -690,7 +690,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-08 17:44:01.888857",
+ "modified": "2024-11-22 17:55:37.216610",
  "modified_by": "Administrator",
  "module": "PinnacleHRMS",
  "name": "Pay Slips",

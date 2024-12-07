@@ -46,6 +46,7 @@ class CreatePaySlips(Document):
         
         createPaySlips(data)
 
+
     # def on_submit(self):
     #     self.add_regenrate_button = 0
     #     pay_slip_list = self.created_pay_slips

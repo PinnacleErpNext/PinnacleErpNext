@@ -2,6 +2,8 @@ import frappe
 import frappe.defaults
 from frappe import _
 import json
+import base64
+import os
 import uuid
 from frappe import sendmail
 from collections import defaultdict
@@ -60,12 +62,27 @@ def get_item_defaults():
 
 # API to get pay slips in create pay slips
 @frappe.whitelist(allow_guest=True)
-def get_pay_slip_list(month, parent_docname):
-    pay_slip_list = frappe.db.sql("""
-        SELECT name, employee_name, net_payble_amount 
-        FROM `tabPay Slips` 
-        WHERE month_num = %s
-    """, (month,), as_dict=True)
+def get_pay_slip_list(parent_docname,month,year,company=None, employee=None):
+    baseQuery = """
+                SELECT
+                    name,
+                    employee_name,
+                    employee_id,
+                    net_payble_amount 
+                FROM
+                    `tabPay Slips` 
+                WHERE 
+                    month_num = %s AND year = %s
+                """
+    filters = [month,year]
+    if (company != ""):
+        filters.append(company)
+        baseQuery += "AND company = %s"
+    if (employee != ""):
+        baseQuery += " AND employee_id = %s" 
+        filters.append(employee)
+    
+    pay_slip_list = frappe.db.sql(baseQuery, filters, as_dict=True)
     
     created_pay_slips = []
 
@@ -73,12 +90,13 @@ def get_pay_slip_list(month, parent_docname):
         generated_name = str(uuid.uuid4())  # Generate a unique ID for the name field
         frappe.db.sql("""
             INSERT INTO `tabCreated Pay Slips` (
-                `name`, `pay_slip`, `employee`, `salary`, `parent`, `parenttype`, `parentfield`
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s);
+                `name`, `pay_slip`, `employee`,`employee_id`, `salary`, `parent`, `parenttype`, `parentfield`
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
         """, (
             generated_name,                 # name
             pay_slip['name'],               # pay_slip
             pay_slip['employee_name'],      # employee
+            pay_slip['employee_id'],      # employee_id
             pay_slip['net_payble_amount'],  # salary
             parent_docname,                 # parent
             'Create Pay Slips',             # parenttype
@@ -89,6 +107,7 @@ def get_pay_slip_list(month, parent_docname):
                         'name': generated_name,
                         'pay_slip': pay_slip['name'],
                         'employee': pay_slip['employee_name'],
+                        'employee_id': pay_slip['employee_id'],
                         'salary': pay_slip['net_payble_amount'],
                         'parent': parent_docname,
                         'parenttype': 'Create Pay Slips',
@@ -119,8 +138,10 @@ def email_pay_slip(pay_slips=None, raw_data=None):
             pay_slips.append(record)
         if raw_data:
             data = pay_slips
-   
+    
     for pay_slip_name in data:
+        if (pay_slip_name == "on"):
+            continue
         doc = frappe.get_doc('Pay Slips', pay_slip_name)
 
         employee_name = doc.employee_name
@@ -131,30 +152,23 @@ def email_pay_slip(pay_slips=None, raw_data=None):
         personal_email = doc.personal_email
 
         subject = f"Pay Slip for {employee_name} - {month} {year}"
-        message = f"""
-        Dear {employee_name},
 
-        Please find attached your pay slip for {month} {year}.
-
-        Best regards,
-        Your Company
-        """
-
-        pdf_attachment = frappe.attach_print(doctype, docname, file_name=f"Pay Slip {docname}")
-
+        # HTML email body with dynamic content
+        context = {"doc": doc}  # Pass data to the template
+        message = frappe.render_template("pinnacle/templates/email/pay_slip.html", context)
+        
+        # Attach the pay slip PDF
         if personal_email:
             frappe.sendmail(
                 recipients=[personal_email],
                 subject=subject,
                 message=message,
-                attachments=[{
-                    'fname': f"Pay Slip - {employee_name}.pdf",
-                    'fcontent': pdf_attachment
-                }],
+                # header=["Pay Slip Notification", "green"]
             )
+            return f"Email sent successfully to {personal_email} with the attached PDF: pay-slip-{doc.month}-{doc.employee_id}.pdf."
         else:
             frappe.throw(f"No email address found for employee {employee_name}")
- 
+
 # API to get pay slip report           
 @frappe.whitelist(allow_guest=True)
 def get_pay_slip_report(year=None,month=None, curr_user=None):
@@ -285,10 +299,13 @@ def get_pay_slip_request(date=None,requested_by=None):
 #API to print pay slip
 @frappe.whitelist(allow_guest=True)
 def print_pay_slip(pay_slips):
-    # return frappe.msgprint("Coming Soon!")
-    pay_slips = json.loads(pay_slips)
-    for pay_slip in pay_slips:
-        frappe.utils.print_format.download_pdf('Pay Slips', pay_slip, format='Pay Slip Format')
+    try:
+        pay_slips = json.loads(pay_slips)
+        for pay_slip in pay_slips:
+            frappe.utils.print_format.download_pdf('Pay Slips', pay_slip, format='Pay Slip Format')
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Pay Slip Printing Error")
+        frappe.throw(f"An error occurred while printing pay slips: {str(e)}")
 
 #API get pay slip requests
 @frappe.whitelist(allow_guest=True)
@@ -453,5 +470,15 @@ def regeneratePaySlip(data):
         
         # Save or submit the document
         pay_slip.save()
+        
+        frappe.db.sql(
+            """UPDATE `tabCreated Pay Slips` SET salary = %s WHERE pay_slip = %s AND employee_id = %s""",
+            (pay_slip.net_payble_amount, pay_slip.name, pay_slip.employee_id)
+        )
+
+        # frappe.db.commit()
+        
+        records = frappe.db.sql("""SELECT pay_slip,employee,salary FROM `tabCreated Pay Slips`""")
+        print(records)
         
         return {"message": _("Success")}

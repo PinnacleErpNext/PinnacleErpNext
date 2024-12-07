@@ -99,7 +99,7 @@ function pay_slip_list(records) {
                 <table class="table table-bordered scrollable-table">
                     <thead>
                         <tr>
-                            <th style="position: sticky; background: #888; color: black; left: 0px; z-index: 2;">Select</th>
+                            <th style="position: sticky; background: #888; color: black; left: 0px; z-index: 2;"><input type="checkbox" id="select_all" />Select All</th>
                             <th style="position: sticky; background: #888; color: black; left: 60px; z-index: 2;">Pay Slip</th>
                             <th style="position: sticky; background: #888; color: black; left: 160px; z-index: 2;">Employee Name</th>
                             <th style="position: sticky; background: #888; color: black; left: 245px; z-index: 2;">Email</th>
@@ -126,7 +126,7 @@ function pay_slip_list(records) {
 
 	records.forEach((record) => {
 		table += `<tr>
-                    <td style="position: sticky; background: #888; color: black; left: 0px; z-index: 2;"><input type="checkbox" value="${record.name}" style="color: black;" /></td>
+                    <td style="position: sticky; background: #888; color: black; left: 0px; z-index: 2;"><input type="checkbox" class="row_checkbox" value="${record.name}" /></td>
                     <td style="position: sticky; background: #888; color: black; left: 60px; z-index: 2;"><a href="/app/pay-slips/${record.name}" style="color: black;">${record.name}</a></td>
                     <td style="position: sticky; background: #888; color: black; left: 160px; z-index: 2;">${record.employee_name}</td>
                     <td style="position: sticky; background: #888; color: black; left: 245px; z-index: 2;">${record.personal_email}</td>
@@ -152,6 +152,16 @@ function pay_slip_list(records) {
 	table += `</tbody></table></div>`;
 	document.getElementById("pay_slip_table").innerHTML = table;
 
+	// Add "Select All" functionality
+	const selectAllCheckbox = document.getElementById("select_all");
+	selectAllCheckbox.addEventListener("change", function () {
+		const isChecked = selectAllCheckbox.checked;
+		document
+			.querySelectorAll('.row_checkbox') // Row checkboxes
+			.forEach((checkbox) => (checkbox.checked = isChecked));
+		updateActionButtonVisibility(); // Update action button visibility
+	});
+
 	// Update action button visibility based on checkbox selection
 	updateActionButtonVisibility();
 	// Email Pay Slips Action
@@ -161,10 +171,17 @@ function pay_slip_list(records) {
 			frappe.msgprint("No Pay Slips selected to email.");
 			return;
 		}
+
+		console.log(selectedRows)
+
+		// Convert selected rows to JSON string
+		const paySlips = JSON.stringify(selectedRows);
+
+		// Call server-side method
 		frappe.call({
 			method: "pinnacle.api.email_pay_slip",
 			args: {
-				pay_slips: selectedRows,
+				pay_slips: paySlips,
 			},
 			callback: function (res) {
 				if (res.message) {
@@ -172,7 +189,7 @@ function pay_slip_list(records) {
 				}
 			},
 			error: function (res) {
-				frappe.msgprint(res.message);
+				frappe.msgprint("Failed to email pay slips: " + (res.message || "Unknown error."));
 			},
 		});
 	});
@@ -196,7 +213,8 @@ function pay_slip_list(records) {
 					}
 				},
 				error: function (error) {
-					console.error("Error downloading PDF for Pay Slip:", pay_slip, error);
+					console.error("AJAX request failed:", error);
+					frappe.msgprint("Failed to download the pay slip PDF. Please check the logs.");
 				},
 			});
 		});
