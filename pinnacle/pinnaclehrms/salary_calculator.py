@@ -487,21 +487,38 @@ def calculateMonthlySalary(employeeData,year, month):
             leaveEncashment = ((paidLeaves / 12) * leaveEncashmentMonths) * perDaySalary
         
         perDaySalary = round(basicSalary / totalWorkingDays, 2)
+        print(len(holidays))
         
-        for holidayDate in holidays:
-            holiday = holidayDate["holiday_date"]
-            
-            dayBeforeHoliday = holiday - timedelta(days=1)
-            
-            dayAfterHoliday = holiday + timedelta(days=1)
-            
-            attendance_before = any(attendanceRecord["attendance_date"] == dayBeforeHoliday for attendanceRecord in attendanceRecords)
-            
-            attendance_after = any(attendanceRecord["attendance_date"] == dayAfterHoliday for attendanceRecord in attendanceRecords)
+        holidayAmount = perDaySalary * len(holidays)
+        
+        # for holidayDate in holidays:
+        #     holiday = holidayDate["holiday_date"]
 
-            if attendance_before or attendance_after:
-                holidayAmount += perDaySalary
-                
+        #     dayBeforeHoliday = holiday - timedelta(days=1)
+        #     dayAfterHoliday = holiday + timedelta(days=1)
+
+        #     # Check if attendance exists before and after the holiday
+        #     attendanceBefore = any(
+        #         attendanceRecord["attendance_date"] == dayBeforeHoliday for attendanceRecord in attendanceRecords
+        #     )
+        #     attendanceAfter = any(
+        #         attendanceRecord["attendance_date"] == dayAfterHoliday for attendanceRecord in attendanceRecords
+        #     )
+
+        #     # Check if the days before and after are also holidays
+        #     isHolidayBefore = any(
+        #         h["holiday_date"] == dayBeforeHoliday for h in holidays
+        #     )
+        #     isHolidayAfter = any(
+        #         h["holiday_date"] == dayAfterHoliday for h in holidays
+        #     )
+
+        #     # Credit holiday amount if conditions are met
+        #     if attendanceBefore or attendanceAfter or (isHolidayBefore and isHolidayAfter):
+        #         holidayAmount += perDaySalary
+        #         print(holidayDate)
+        #         print(holidayAmount)
+
         
         for day in range(1, totalWorkingDays + 1):
             today = datetime(year, month, day).date()
@@ -533,8 +550,10 @@ def calculateMonthlySalary(employeeData,year, month):
                     if (totalWorkingHours > 3):
                         deductionPercentage = calculateDeduction(checkIn, checkOut, slabs)
                         salary = calculateFinalAmount(perDaySalary, deductionPercentage)
-                        # print(attendanceDate,deductionPercentage,salary)
+                        print(attendanceDate,deductionPercentage,salary)
                         totalSalary += salary
+                    else:
+                        deductionPercentage = 1
                         
                     if checkIn>idealCheckInTime:
                         if lates<allowedLates :
@@ -550,7 +569,6 @@ def calculateMonthlySalary(employeeData,year, month):
                     
                     if deductionPercentage == 0:
                         if attendanceDate.weekday() == 6:  
-                            sundaysSalary += perDaySalary
                             sundays += 1
                             actualWorkingDays+=1
                         else:
@@ -559,7 +577,6 @@ def calculateMonthlySalary(employeeData,year, month):
                     elif 0 < deductionPercentage < 0.1:  # Deduction percentage is between 0 and 0.1
                         if checkIn > idealCheckInTime and idealCheckInTime < datetime.combine(attendanceDate, time(11, 0)):
                             if attendanceDate.weekday() == 6:  
-                                sundaysSalary += perDaySalary
                                 sundays += 1
                                 actualWorkingDays+=1
                             else:
@@ -567,7 +584,6 @@ def calculateMonthlySalary(employeeData,year, month):
                                 actualWorkingDays+=1
                         else:
                             if attendanceDate.weekday() == 6:  
-                                sundaysSalary += perDaySalary
                                 sundays += 1
                                 actualWorkingDays+=1
                             else:
@@ -575,7 +591,6 @@ def calculateMonthlySalary(employeeData,year, month):
                                 actualWorkingDays+=1
                     elif 0.1 <= deductionPercentage < 0.25:  # Deduction percentage between 0.1 and 0.25
                         if attendanceDate.weekday() == 6:  
-                            sundaysSalary += perDaySalary
                             sundays += 1
                             actualWorkingDays+=1
                         else:
@@ -583,7 +598,6 @@ def calculateMonthlySalary(employeeData,year, month):
                             actualWorkingDays+=1
                     elif 0.25 <= deductionPercentage < 0.5:  # Deduction percentage between 0.25 and 0.5
                         if attendanceDate.weekday() == 6:  
-                            sundaysSalary += perDaySalary
                             sundays += 1
                             actualWorkingDays+=1
                         else:
@@ -591,7 +605,6 @@ def calculateMonthlySalary(employeeData,year, month):
                             actualWorkingDays+=1
                     elif 0.5 <= deductionPercentage < 0.75:  # Deduction percentage between 0.5 and 0.75
                         if attendanceDate.weekday() == 6:  
-                            sundaysSalary += perDaySalary
                             sundays += 1
                             actualWorkingDays+=1
                         else:
@@ -612,10 +625,11 @@ def calculateMonthlySalary(employeeData,year, month):
                     totalAbsents += 1
         
         totalSalary -= totalLateDeductions
+        print(totalSalary)
         if actualWorkingDays > 0:
-            totalSalary += (sundaysSalary + overtimeSalary + holidayAmount + leaveEncashment)
+            totalSalary += (overtimeSalary + holidayAmount + leaveEncashment)
         else:
-            totalSalary += (sundaysSalary + overtimeSalary + leaveEncashment)
+            totalSalary += (overtimeSalary + leaveEncashment)
         
         data["salary_information"] = {
             "basic_salary": basicSalary,
