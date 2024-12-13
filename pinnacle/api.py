@@ -479,4 +479,4 @@ def regeneratePaySlip(data):
         # frappe.db.commit()
         
         
-        return {"message": _("Success")}
+    return {"message": _("Success")}
