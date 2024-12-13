@@ -611,8 +611,11 @@ def calculateMonthlySalary(employeeData,year, month):
                             quarterDays += 1
                             actualWorkingDays+=1
                     elif 0.75 <= deductionPercentage <= 1:  # Deduction percentage between 0.75 and 1
-                        totalAbsents += 1
-                        actualWorkingDays+=1        
+                        if any(holiday['holiday_date'] == today for holiday in holidays):
+                            pass
+                        else:
+                            totalAbsents += 1
+                            actualWorkingDays+=1        
                 else:
                     if any(holiday['holiday_date'] == today for holiday in holidays):
                         pass

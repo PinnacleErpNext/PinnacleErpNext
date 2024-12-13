@@ -478,7 +478,5 @@ def regeneratePaySlip(data):
 
         # frappe.db.commit()
         
-        records = frappe.db.sql("""SELECT pay_slip,employee,salary FROM `tabCreated Pay Slips`""")
-        print(records)
         
         return {"message": _("Success")}
