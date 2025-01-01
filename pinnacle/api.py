@@ -404,7 +404,7 @@ def regeneratePaySlip(data):
             }
         month_name = month_mapping.get(month)
         salaryInfo = data.get("salary_information", {})
-        htmlContent = frappe.render_template("pinnaclehrms/templates/attendance_record.html", {"attendance_record": data.get("attendance_records")})
+        attendanceRecord = frappe.render_template("pinnaclehrms/templates/attendance_record.html", {"attendance_record": data.get("attendance_records")})
         
         full_day_working_amount = round((salaryInfo.get("full_days", 0) * salaryInfo.get("per_day_salary", 0)), 2)
         quarter_day_working_amount = round((salaryInfo.get("quarter_days", 0) * salaryInfo.get("per_day_salary", 0) * .75), 2)

@@ -158,7 +158,9 @@ def createPaySlips(data):
                     "type":"Holidays",
                     "amount":salaryInfo.get("holidays"),
                 })
-                    
+                
+                attendanceRecord = frappe.render_template("pinnaclehrms/templates/attendance_record.html", {"attendance_record": data.get("attendance_records")})
+                paySlip.attendance_record = attendanceRecord
                 
                 # Insert the new document to save it in the database
                 paySlip.insert()
@@ -794,6 +796,8 @@ def calculateMonthlySalary(employeeData,year, month):
             totalSalary += (overtimeSalary + holidayAmount + leaveEncashment)
         else:
             totalSalary += (overtimeSalary + leaveEncashment)
+        
+        data["attendance_records"] = empAttendanceRecord
         
         data["salary_information"] = {
             "basic_salary": basicSalary,
