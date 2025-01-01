@@ -1,20 +1,16 @@
 [
  {
-  "app": "Pinnacle",
   "charts": [],
   "content": "[{\"id\":\"x7G0b8b2Fp\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Employee Dashboard</span>\",\"col\":12}},{\"id\":\"2xaEyB7lA_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee Check In\",\"col\":3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
-  "external_link": null,
   "for_user": "",
   "hide_custom": 0,
   "icon": "support",
   "indicator_color": "green",
   "is_hidden": 0,
   "label": "Employee Dashboard",
-  "link_to": null,
-  "link_type": "DocType",
   "links": [],
   "modified": "2024-10-28 18:27:49.741926",
   "module": "",
@@ -26,9 +22,15 @@
   "restrict_to_domain": null,
   "roles": [
    {
+    "parent": "Employee Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
     "role": "All"
    },
    {
+    "parent": "Employee Dashboard",
+    "parentfield": "roles",
+    "parenttype": "Workspace",
     "role": "Employee"
    }
   ],
@@ -42,13 +44,15 @@
     "kanban_board": null,
     "label": "Employee Check In",
     "link_to": "Employee Checkin",
+    "parent": "Employee Dashboard",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
     "restrict_to_domain": null,
     "stats_filter": "[]",
     "type": "DocType",
     "url": null
    }
   ],
-  "title": "Employee Dashboard",
-  "type": "Workspace"
+  "title": "Employee Dashboard"
  }
 ]

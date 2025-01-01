@@ -3,6 +3,7 @@ import json
 from datetime import datetime, time, timedelta
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
+from pprint import pprint
 
 def createPaySlips(data):
         
@@ -47,7 +48,7 @@ def createPaySlips(data):
                 monthName = monthMapping.get(month)
 
                 # Create a new Pay Slip document
-                new_doc = frappe.get_doc({
+                paySlip = frappe.get_doc({
                     'doctype': 'Pay Slips',
                     'docstatus': 0,
                     'year': year,
@@ -65,40 +66,102 @@ def createPaySlips(data):
                     'basic_salary': data.get("basic_salary"),
                     'per_day_salary': salaryInfo.get("per_day_salary"),
                     'standard_working_days': salaryInfo.get("standard_working_days"),
-                    'full_day_working_days': salaryInfo.get("full_days"),
-                    "full_days_working_rate": salaryInfo.get("per_day_salary"),
-                    "full_day_working_amount": fullDayWorkingAmount,
-                    'early_checkout_working_days': salaryInfo.get("early_checkout_days"),
-                    "early_checkout_working_rate": salaryInfo.get("per_day_salary"),
-                    "early_checkout_working_amount": earlyCheckoutWorkingAmount,
-                    'quarter_day_working_days': salaryInfo.get("quarter_days"),
-                    'quarter_day_working_rate': salaryInfo.get("per_day_salary"),
-                    'quarter_day_working_amount': quarterDayWorkingAmount,
-                    'half_day_working_days': salaryInfo.get("half_days"),
-                    'half_day_working_rate': salaryInfo.get("per_day_salary"),
-                    'half_day_working_amount': halfDayWorkingAmount,
-                    'three_four_quarter_days_working_days': salaryInfo.get("three_four_quarter_days"),
-                    'three_four_quarter_days_rate': salaryInfo.get("per_day_salary"),
-                    'three_four_quarter_days_working_amount': threeFourQuarterDaysWorkingAmount,
-                    'lates_days': salaryInfo.get("lates"),
-                    'lates_rate': salaryInfo.get("per_day_salary"),
-                    'lates_amount': latesAmount,
+                    "others_days": salaryInfo.get("others"),
                     'absent': salaryInfo.get("absent"),
-                    'sundays_working_days': salaryInfo.get("sundays_working_days"),
-                    'sunday_working_amount': salaryInfo.get("sundays_salary"),
-                    'sunday_working_rate': salaryInfo.get("per_day_salary"),
                     'actual_working_days': salaryInfo.get("actual_working_days"),
                     'net_payble_amount': salaryInfo.get("total_salary"),
-                    'other_ernings_overtime_amount': salaryInfo.get("overtime"),
                     'other_earnings_amount': otherEarningsAmount,
                     'total': round(((fullDayWorkingAmount + quarterDayWorkingAmount + halfDayWorkingAmount + threeFourQuarterDaysWorkingAmount) - latesAmount), 2),
-                    'other_ernings_holidays_amount': salaryInfo.get("holidays"),
-                    'other_earnings_leave_encashent': salaryInfo.get("leave_encashment")
                 })
                 
+                if salaryInfo.get("full_days"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "Full Day",
+                        "days":salaryInfo.get("full_days"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "effective_percentage": "100",
+                        "amount": fullDayWorkingAmount,
+                        }
+                    )
+                if salaryInfo.get("lates"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "Lates",
+                        "days":salaryInfo.get("lates"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "effective_percentage": "10",
+                        "amount": latesAmount,
+                        }
+                    )
+                if salaryInfo.get("three_four_quarter_days"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "3/4 Quarter Day",
+                        "days":salaryInfo.get("three_four_quarter_days"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "effective_percentage": "75",
+                        "amount": threeFourQuarterDaysWorkingAmount,
+                        }
+                    )
+                if salaryInfo.get("half_days"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "Half Day",
+                        "days":salaryInfo.get("half_days"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "effective_percentage": "50",
+                        "amount": halfDayWorkingAmount,
+                        }
+                    )
+                if salaryInfo.get("quarter_days"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "Quarter Day",
+                        "days":salaryInfo.get("quarter_days"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "effective_percentage": "50",
+                        "amount": quarterDayWorkingAmount,
+                        }
+                    )
+                if salaryInfo.get("others"):
+                    paySlip.append(
+                        "salary_calculation",{
+                        "particulars": "Others Day",
+                        "days":salaryInfo.get("others"),
+                        }
+                    )
+                if salaryInfo.get("sundays_working_days"):
+                    paySlip.append("salary_calculation",{
+                        "particulars":"Sunday Workings",
+                        "days":salaryInfo.get("sundays_working_days"),
+                        "rate":salaryInfo.get("per_day_salary"),
+                        "amount": salaryInfo.get("sundays_salary")
+                    })
+                paySlip.append("other_earnings",{
+                    "type":"Incentives",
+                    "amount":0,
+                })
+                paySlip.append("other_earnings",{
+                    "type":"Special Incentives",
+                    "amount":0,
+                })
+                paySlip.append("other_earnings",{
+                    "type":"Leave Encashment",
+                    "amount":salaryInfo.get("leave_encashment"),
+                })
+                paySlip.append("other_earnings",{
+                    "type":"Overtime",
+                    "amount":salaryInfo.get("overtime"),
+                })
+                paySlip.append("other_earnings",{
+                    "type":"Holidays",
+                    "amount":salaryInfo.get("holidays"),
+                })
+                    
                 
                 # Insert the new document to save it in the database
-                new_doc.insert()
+                paySlip.insert()
 
 def getEmpRecords(data):
         
@@ -115,6 +178,7 @@ def getEmpRecords(data):
                 e.date_of_joining,
                 e.attendance_device_id,
                 e.default_shift,
+                e.holiday_list,
                 a.attendance_date,
                 a.in_time,
                 a.out_time
@@ -150,11 +214,6 @@ def getEmpRecords(data):
             filters.append(employee)
         
         date = f"{year}-{month:02d}-01"
-        
-        holidays = frappe.db.sql("""
-                                SELECT holiday_date FROM tabHoliday 
-                                WHERE MONTH(holiday_date) = %s AND YEAR(holiday_date) = %s """,
-                                (month, year),as_dict=True)
 
         # Determine the number of working days in the month
         if month == 2:
@@ -167,8 +226,7 @@ def getEmpRecords(data):
             workingDays = 30
         else:
             workingDays = 31
-        
-              
+         
         records = frappe.db.sql(baseQuery, filters, as_dict=False)
         if not records:
             return frappe.throw("No records found!")
@@ -187,6 +245,7 @@ def getEmpRecords(data):
             "lates":"",
             "holidays":"",
             "working_days":"",
+            "holiday_list":"",
             "basic_salary": 0,
             "attendance_device_id": "",
             "attendance_records": [],
@@ -197,7 +256,7 @@ def getEmpRecords(data):
         for record in records:
             (
                 company,employee_id, employee_name, personal_email, designation, department,
-                pan_number, date_of_joining, attendance_device_id, shift,
+                pan_number, date_of_joining, attendance_device_id, shift, holiday_list,
                 attendance_date, in_time, out_time
             ) = record
             salaryData = frappe.db.sql("""
@@ -217,6 +276,10 @@ def getEmpRecords(data):
             else:
                 return frappe.throw(f"No salary found for employee {employee_id}")
             
+            holidays = frappe.db.sql("""
+                                SELECT holiday_date FROM tabHoliday 
+                                WHERE MONTH(holiday_date) = %s AND YEAR(holiday_date) = %s AND parent = %s """,
+                                (month, year, holiday_list),as_dict=True)
             
             if empRecords[employee_id]["employee"]:
                 # Employee already exists, append to attendance_records
@@ -245,6 +308,7 @@ def getEmpRecords(data):
                     "is_overtime":isOvertime,
                     "attendance_device_id": attendance_device_id,
                     "shift":shift,
+                    "holiday_list": holiday_list,
                     "attendance_records": [{
                         "attendance_date": attendance_date,
                         "shift":shift,
@@ -255,7 +319,7 @@ def getEmpRecords(data):
                 }
         
         # Calculate monthly salary for each employe
-        # frappe.throw(str(dict(emp_records)))
+        # frappe.throw(str(dict(empRecords)))
         
         return empRecords
 
@@ -336,26 +400,24 @@ def getShiftDetails(empId, shiftVariationRecord, attendanceDate, attendanceRecor
             raise ValueError(f"Shift details missing for shift {shift}")
         return calculateShiftTimes(attendanceDate, shiftStart, shiftEnd)
 
-def createTimeSlabs(checkInTime, checkOutTime):
-  
-    idealWorkingTime = checkOutTime - checkInTime
-    iwh = idealWorkingTime.total_seconds() / 60
+def createTimeSlabs(check_in_time, check_out_time):
+    ideal_working_time = check_out_time - check_in_time
+    iwh = ideal_working_time.total_seconds() / 60
     
     slabs = {
         "check_in": [
-            (checkInTime, checkInTime + timedelta(minutes=round(iwh*0.113)), 0.10),  # 10% deduction
-            (checkInTime + timedelta(minutes=round(iwh*0.113)), checkInTime + timedelta(minutes=round(iwh*0.3351)), 0.25),  # 25% deduction
-            (checkInTime + timedelta(minutes=round(iwh*0.3351)), checkInTime + timedelta(minutes=round(iwh*0.668)), 0.50),  # 50% deduction
-            (checkInTime + timedelta(minutes=round(iwh*0.668)), checkInTime + timedelta(minutes=round(iwh*1)), 0.75),  # 75% deduction
+            (check_in_time, check_in_time + timedelta(minutes=round(iwh * 0.112)), 0.10),  # 10% deduction
+            (check_in_time + timedelta(minutes=round(iwh * 0.112)), check_in_time + timedelta(minutes=round(iwh * 0.334)), 0.25),  # 25% deduction
+            (check_in_time + timedelta(minutes=round(iwh * 0.334)), check_in_time + timedelta(minutes=round(iwh * 0.667)), 0.50),  # 50% deduction
+            (check_in_time + timedelta(minutes=round(iwh * 0.667)), check_in_time + timedelta(minutes=round(iwh * 1)), 0.75),  # 75% deduction
         ],
         "check_out": [
-            (checkOutTime - timedelta(minutes=round(iwh*1)), checkOutTime - timedelta(minutes=round(iwh*0.664)), 0.75),  # 75% deduction
-            (checkOutTime - timedelta(minutes=round(iwh*0.664)), checkOutTime - timedelta(minutes=round((iwh*0.331))), 0.50),  # 50% deduction
-            (checkOutTime - timedelta(minutes=round((iwh*0.331))), checkOutTime - timedelta(minutes=round((iwh*0.109))), 0.25),  # 25% deduction
-            (checkOutTime - timedelta(minutes=round((iwh*0.109))), checkOutTime, 0.10),  # 10% deduction
+            (check_out_time - timedelta(minutes=round(iwh * 1)), check_out_time - timedelta(minutes=round(iwh * 0.664)), 0.75),  # 75% deduction
+            (check_out_time - timedelta(minutes=round(iwh * 0.664)), check_out_time - timedelta(minutes=round((iwh * 0.331))), 0.50),  # 50% deduction
+            (check_out_time - timedelta(minutes=round((iwh * 0.331))), check_out_time - timedelta(minutes=round((iwh * 0.109))), 0.25),  # 25% deduction
+            (check_out_time - timedelta(minutes=round((iwh * 0.109))), check_out_time, 0.10),  # 10% deduction
         ],
     }
-    
     return slabs
 
 def calculateDeduction(checkIn, checkOut, slabs):
@@ -363,13 +425,13 @@ def calculateDeduction(checkIn, checkOut, slabs):
 
     # Check which check-in slab applies
     for start, end, rate in slabs["check_in"]:
-        if start <= checkIn < end:
+        if start < checkIn <= end:
             deductionPercentage += rate
             break
 
     # Check which check-out slab applies
     for start, end, rate in slabs["check_out"]:
-        if start < checkOut <= end:
+        if start <= checkOut < end:
             deductionPercentage += rate
             break
 
@@ -398,7 +460,7 @@ def calculateMonthlySalary(employeeData,year, month):
     endDate = datetime(endYear, 3, 31)
     
     for emp_id, data in employeeData.items():
-        
+        print(data.get("employee_name"))
         totalSalary = 0.0
         totalLateDeductions = 0.0
         fullDays = 0
@@ -408,12 +470,20 @@ def calculateMonthlySalary(employeeData,year, month):
         totalAbsents = 0
         lates = 0
         sundays = 0
+        others = 0
         sundaysSalary = 0.0
         overtimeSalary = 0.0
         actualWorkingDays = 0
         leaveEncashment = 0
         earlyCheckOutDays = 0
         holidayAmount = 0
+        empAttendance = {
+            "date": None,
+            "deductionPercentage": None,
+            "salary": None,
+            "status": None,
+        }
+        empAttendanceRecord = []
         
         basicSalary = data.get("basic_salary", 0)
         attendanceRecords = data.get("attendance_records", [])
@@ -471,7 +541,9 @@ def calculateMonthlySalary(employeeData,year, month):
                                           """,(data.get('employee'),startYear,endYear),as_dict=True)
             
             averageSalary = leaveEncashmentData[0].avgSalary
-            paidLeaves = leaveEncashmentData[0].paidLeaves/86400
+            paidLeaves = 0
+            if leaveEncashmentData[0].paidLeaves is not None:
+                paidLeaves = leaveEncashmentData[0].paidLeaves/86400
             
             perDaySalary = averageSalary/ 30
             
@@ -487,9 +559,11 @@ def calculateMonthlySalary(employeeData,year, month):
             leaveEncashment = ((paidLeaves / 12) * leaveEncashmentMonths) * perDaySalary
         
         perDaySalary = round(basicSalary / totalWorkingDays, 2)
-        print(len(holidays))
         
+        
+        print(len(holidays))
         holidayAmount = perDaySalary * len(holidays)
+        print(holidayAmount)
         
         # for holidayDate in holidays:
         #     holiday = holidayDate["holiday_date"]
@@ -541,81 +615,169 @@ def calculateMonthlySalary(employeeData,year, month):
                 if inTime and outTime:
                     checkIn = datetime.combine(attendanceDate, inTime.time())
                     checkOut = datetime.combine(attendanceDate, outTime.time())
+                    status = ""
                     
                     totalWorkingTime = checkOut - checkIn
                     totalWorkingHours = round((totalWorkingTime.total_seconds() / 3600),2)
                     
                     slabs = createTimeSlabs(idealCheckInTime, idealCheckOutTime)
+                   
                     
                     if (totalWorkingHours > 3):
                         deductionPercentage = calculateDeduction(checkIn, checkOut, slabs)
                         salary = calculateFinalAmount(perDaySalary, deductionPercentage)
-                        print(attendanceDate,deductionPercentage,salary)
                         totalSalary += salary
+                        
+                        if checkIn>idealCheckInTime and (deductionPercentage == 0.1 or deductionPercentage == 0.2):
+                            if lates<allowedLates :
+                                totalSalary += (perDaySalary*0.1)
+                    
+                        # overtime salary calculation if marked is eligible
+                        if isOvertime and checkOut > overtimeThreshold:
+                                extraTime = checkOut - idealCheckOutTime
+                                overtime = extraTime.total_seconds() / 60
+                                minOvertimeSalary = perDaySalary / 540
+                                overtimeSalary = overtime * minOvertimeSalary
+                        
+                        if deductionPercentage == 0:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                            else:
+                                fullDays += 1
+                                actualWorkingDays+=1
+                                status = "Full Days"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                        elif deductionPercentage == 0.1:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    })
+                            else:
+                                lates +=1
+                                actualWorkingDays +=1
+                                status = "Late"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                        elif deductionPercentage == 0.25:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                            else:
+                                threeFourQuarterDays += 1
+                                actualWorkingDays += 1
+                                status = "3/4"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                        elif deductionPercentage == 0.5:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                            else:
+                                halfDays += 1
+                                actualWorkingDays += 1
+                                status = "Half Day"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                        elif deductionPercentage == 0.25:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                            else:
+                                quarterDays += 1
+                                actualWorkingDays += 1
+                                status = "Quarter"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                        else:
+                            if attendanceDate.weekday() == 6:
+                                sundays += 1
+                                actualWorkingDays+=1
+                                status = "Sunday"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
+                            else:
+                                others += 1
+                                actualWorkingDays += 1
+                                status = "Others"
+                                empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    }) 
                     else:
                         deductionPercentage = 1
-                        
-                    if checkIn>idealCheckInTime:
-                        if lates<allowedLates :
-                            totalSalary += (perDaySalary*0.1)
-                        lates += 1
-                    
-                    # overtime salary calculation if marked is eligible
-                    if isOvertime and checkOut > overtimeThreshold:
-                            extraTime = checkOut - idealCheckOutTime
-                            overtime = extraTime.total_seconds() / 60
-                            minOvertimeSalary = perDaySalary / 540
-                            overtimeSalary = overtime * minOvertimeSalary
-                    
-                    if deductionPercentage == 0:
-                        if attendanceDate.weekday() == 6:  
-                            sundays += 1
-                            actualWorkingDays+=1
-                        else:
-                            fullDays += 1
-                            actualWorkingDays+=1
-                    elif 0 < deductionPercentage < 0.1:  # Deduction percentage is between 0 and 0.1
-                        if checkIn > idealCheckInTime and idealCheckInTime < datetime.combine(attendanceDate, time(11, 0)):
-                            if attendanceDate.weekday() == 6:  
-                                sundays += 1
-                                actualWorkingDays+=1
-                            else:
-                                lates += 1
-                                actualWorkingDays+=1
-                        else:
-                            if attendanceDate.weekday() == 6:  
-                                sundays += 1
-                                actualWorkingDays+=1
-                            else:
-                                earlyCheckOutDays += 1
-                                actualWorkingDays+=1
-                    elif 0.1 <= deductionPercentage < 0.25:  # Deduction percentage between 0.1 and 0.25
-                        if attendanceDate.weekday() == 6:  
-                            sundays += 1
-                            actualWorkingDays+=1
-                        else:
-                            threeFourQuarterDays += 1
-                            actualWorkingDays+=1
-                    elif 0.25 <= deductionPercentage < 0.5:  # Deduction percentage between 0.25 and 0.5
-                        if attendanceDate.weekday() == 6:  
-                            sundays += 1
-                            actualWorkingDays+=1
-                        else:
-                            halfDays += 1
-                            actualWorkingDays+=1
-                    elif 0.5 <= deductionPercentage < 0.75:  # Deduction percentage between 0.5 and 0.75
-                        if attendanceDate.weekday() == 6:  
-                            sundays += 1
-                            actualWorkingDays+=1
-                        else:
-                            quarterDays += 1
-                            actualWorkingDays+=1
-                    elif 0.75 <= deductionPercentage <= 1:  # Deduction percentage between 0.75 and 1
                         if any(holiday['holiday_date'] == today for holiday in holidays):
                             pass
                         else:
                             totalAbsents += 1
-                            actualWorkingDays+=1        
+                            status = "Absent"  
+                            empAttendanceRecord.append({
+                                    "date": attendanceDate,
+                                    "deductionPercentage":deductionPercentage,
+                                    "salary": salary,
+                                    "status":status
+                                    })  
                 else:
                     if any(holiday['holiday_date'] == today for holiday in holidays):
                         pass
@@ -628,7 +790,6 @@ def calculateMonthlySalary(employeeData,year, month):
                     totalAbsents += 1
         
         totalSalary -= totalLateDeductions
-        print(totalSalary)
         if actualWorkingDays > 0:
             totalSalary += (overtimeSalary + holidayAmount + leaveEncashment)
         else:
@@ -645,6 +806,7 @@ def calculateMonthlySalary(employeeData,year, month):
             "three_four_quarter_days": threeFourQuarterDays,
             "sundays_working_days": sundays,
             "early_checkout_days": earlyCheckOutDays,
+            "others":others,
             "sundays_salary": sundaysSalary,
             "total_salary": round(totalSalary,2),
             "total_late_deductions": totalLateDeductions,

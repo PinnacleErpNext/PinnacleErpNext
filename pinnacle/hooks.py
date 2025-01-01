@@ -13,9 +13,10 @@ import pinnacle.pinnacleglobals.override_auth
 # required_apps = []
 
 fixtures = [
-    {'dt': 'Print Format', 'filters': [['name', 'in', ['Pay Slip Format']]]},
+    {'dt': 'Print Format', 'filters': [['name', 'in', ['Pay Slip Format','MGC Quotation']]]},
     {'dt':'Custom Field','filters':[['name','in',['Employee Checkin-custom_comment']]]},
-    {'dt':'Workspace','filters':[['name','in',['Employee Dashboard']]]}
+    {'dt':'Workspace','filters':[['name','in',['Employee Dashboard']]]},
+    {'dt':'Client Script','filters':[['name','in',['Remove Attachment','Set Naming Series in quotation','Set Naming Series for sales order']]]},
 ]
 
 # Each item in the list will be shown as an app in the apps page
@@ -51,7 +52,11 @@ fixtures = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Lead" : "pinnaclecrm/public/js/lead_custom_naming_series.js",
+    "Quotation" : "pinnaclecrm/public/js/quotation_custom_naming_series.js",
+    "Sales Order" : "pinnaclecrm/public/js/sales_order_naming_series.js"
+    }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

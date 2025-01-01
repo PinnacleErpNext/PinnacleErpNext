@@ -8,7 +8,6 @@ from pinnacle.pinnaclehrms.salary_calculator import createPaySlips
 
 
 class CreatePaySlips(Document):
-    
     def autoname(self):
         if self.genrate_for_all:
             self.name = f"For-all-pay-slip-{self.year}-{self.month}"

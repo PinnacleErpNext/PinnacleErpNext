@@ -127,7 +127,7 @@ function pay_slip_list(records) {
 	records.forEach((record) => {
 		table += `<tr>
                     <td style="position: sticky; background: #888; color: black; left: 0px; z-index: 2;"><input type="checkbox" class="row_checkbox" value="${record.name}" /></td>
-                    <td style="position: sticky; background: #888; color: black; left: 60px; z-index: 2;"><a href="/app/pay-slips/${record.name}" style="color: black;">${record.name}</a></td>
+                    <td style="position: sticky; background: #888; color: black; left: 60px; z-index: 2;"><a href="/app/pay-slips/${record.name}" target="blank" style="color: black;">${record.name}</a></td>
                     <td style="position: sticky; background: #888; color: black; left: 160px; z-index: 2;">${record.employee_name}</td>
                     <td style="position: sticky; background: #888; color: black; left: 245px; z-index: 2;">${record.personal_email}</td>
                     <td style="position: sticky; background: #888; color: black; left: 450px; z-index: 2;">${record.date_of_joining}</td>
