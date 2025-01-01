@@ -384,6 +384,8 @@ def regeneratePaySlip(data):
     empRecords = getEmpRecords(data)
     employeeData = calculateMonthlySalary(empRecords,year,month)
     
+    # frappe.throw(str(employeeData))
+    
     for emp_id, data in employeeData.items():
         
         month_mapping = {
@@ -401,15 +403,15 @@ def regeneratePaySlip(data):
                 12: "December"
             }
         month_name = month_mapping.get(month)
+        salaryInfo = data.get("salary_information", {})
+        htmlContent = frappe.render_template("pinnaclehrms/templates/attendance_record.html", {"attendance_record": data.get("attendance_records")})
         
-        salary_info = data.get("salary_information", {})
-        
-        full_day_working_amount = round((salary_info.get("full_days", 0) * salary_info.get("per_day_salary", 0)), 2)
-        quarter_day_working_amount = round((salary_info.get("quarter_days", 0) * salary_info.get("per_day_salary", 0) * .75), 2)
-        half_day_working_amount = round((salary_info.get("half_days", 0) * .5 * salary_info.get("per_day_salary", 0)), 2)
-        three_four_quarter_days_working_amount = round((salary_info.get("three_four_quarter_days", 0) * .25 * salary_info.get("per_day_salary", 0)), 2)
-        lates_amount = round((salary_info.get("lates", 0) * salary_info.get("per_day_salary", 0) * .1), 2)
-        other_earnings_amount = round((salary_info.get("overtime", 0)), 2) + salary_info.get("holidays")
+        full_day_working_amount = round((salaryInfo.get("full_days", 0) * salaryInfo.get("per_day_salary", 0)), 2)
+        quarter_day_working_amount = round((salaryInfo.get("quarter_days", 0) * salaryInfo.get("per_day_salary", 0) * .75), 2)
+        half_day_working_amount = round((salaryInfo.get("half_days", 0) * .5 * salaryInfo.get("per_day_salary", 0)), 2)
+        three_four_quarter_days_working_amount = round((salaryInfo.get("three_four_quarter_days", 0) * .25 * salaryInfo.get("per_day_salary", 0)), 2)
+        lates_amount = round((salaryInfo.get("lates", 0) * salaryInfo.get("per_day_salary", 0) * .1), 2)
+        other_earnings_amount = round((salaryInfo.get("overtime", 0)), 2) + salaryInfo.get("holidays",0)
         
         # Check if a Pay Slip already exists for the employee
         existing_doc = frappe.get_all('Pay Slips', filters={
@@ -427,46 +429,157 @@ def regeneratePaySlip(data):
         
         # Update the fields
         pay_slip.update({
-          'year': year,
-          'month': month_name,
-          'company': data.get("company"),
-          'employee_id': data.get("employee"),
-          'employee_name': data.get("employee_name"),
-          'personal_email': data.get("personal_email"),
-          'designation': data.get("designation"),
-          'department': data.get("department"),
-          'pan_number': data.get("pan_number"),
-          'date_of_joining': data.get("date_of_joining"),
-          'attendance_device_id': data.get("attendance_device_id"),
-          'basic_salary': data.get("basic_salary"),
-          'per_day_salary': salary_info.get("per_day_salary"),
-          'standard_working_days': salary_info.get("standard_working_days"),
-          'full_day_working_days': salary_info.get("full_days"),
-          "full_days_working_rate": salary_info.get("per_day_salary"),
-          "full_day_working_amount": full_day_working_amount,
-          'quarter_day_working_days': salary_info.get("quarter_days"),
-          'quarter_day_working_rate': salary_info.get("per_day_salary"),
-          'quarter_day_working_amount': quarter_day_working_amount,
-          'half_day_working_days': salary_info.get("half_days"),
-          'half_day_working_rate': salary_info.get("per_day_salary"),
-          'half_day_working_amount': half_day_working_amount,
-          'three_four_quarter_days_working_days': salary_info.get("three_four_quarter_days"),
-          'three_four_quarter_days_rate': salary_info.get("per_day_salary"),
-          'three_four_quarter_days_working_amount': three_four_quarter_days_working_amount,
-          'lates_days': salary_info.get("lates"),
-          'lates_rate': salary_info.get("per_day_salary"),
-          'lates_amount': lates_amount,
-          'absent': salary_info.get("absent"),
-          'sundays_working_days': salary_info.get("sundays_working_days"),
-          'sunday_working_amount': salary_info.get("sundays_salry"),
-          'sunday_working_rate':salary_info.get("per_day_salary"),
-          'actual_working_days': salary_info.get("actual_working_days"),
-          'net_payble_amount': salary_info.get("total_salary"),
-          'other_earnings_overtime': salary_info.get("overtime"),
-          'other_earnings_amount': other_earnings_amount,
-          'other_ernings_holidays_amount': salary_info.get("holidays"),
-          'total': round(((full_day_working_amount + quarter_day_working_amount + half_day_working_amount + three_four_quarter_days_working_amount) - lates_amount), 2),
+            'year': year,
+            'month': month_name,
+            'month_num': month,
+            'company': data.get("company"),
+            'employee_id': data.get("employee"),
+            'employee_name': data.get("employee_name"),
+            'personal_email': data.get("personal_email"),
+            'designation': data.get("designation"),
+            'department': data.get("department"),
+            'pan_number': data.get("pan_number"),
+            'date_of_joining': data.get("date_of_joining"),
+            'attendance_device_id': data.get("attendance_device_id"),
+            'basic_salary': data.get("basic_salary"),
+            'per_day_salary': salaryInfo.get("per_day_salary"),
+            'standard_working_days': salaryInfo.get("standard_working_days"),
+            'others_days': salaryInfo.get("others"),  # Corrected field to match "others_days"
+            'absent': salaryInfo.get("absent"),
+            'actual_working_days': salaryInfo.get("actual_working_days"),
+            'net_payble_amount': salaryInfo.get("total_salary"),
+            'other_earnings_amount': other_earnings_amount,  # Corrected key alignment
+            'total': round(
+                (
+                    full_day_working_amount +
+                    quarter_day_working_amount +
+                    half_day_working_amount +
+                    three_four_quarter_days_working_amount -
+                    lates_amount
+                ), 2
+            ),
         })
+
+        
+        print(htmlContent)
+        pay_slip.attendance_record = htmlContent
+        
+        # Update child table for "salary_calculation"
+        pay_slip.salary_calculation = []
+
+        if salaryInfo.get("full_days"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Full Day",
+                    "days": salaryInfo.get("full_days"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "effective_percentage": "100",
+                    "amount": full_day_working_amount,
+                }
+            )
+        if salaryInfo.get("lates"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Lates",
+                    "days": salaryInfo.get("lates"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "effective_percentage": "10",
+                    "amount": lates_amount,
+                }
+            )
+        if salaryInfo.get("three_four_quarter_days"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "3/4 Quarter Day",
+                    "days": salaryInfo.get("three_four_quarter_days"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "effective_percentage": "75",
+                    "amount": three_four_quarter_days_working_amount,
+                }
+            )
+        if salaryInfo.get("half_days"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Half Day",
+                    "days": salaryInfo.get("half_days"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "effective_percentage": "50",
+                    "amount": half_day_working_amount,
+                }
+            )
+        if salaryInfo.get("quarter_days"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Quarter Day",
+                    "days": salaryInfo.get("quarter_days"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "effective_percentage": "25",
+                    "amount": quarter_day_working_amount,
+                }
+            )
+        if salaryInfo.get("others"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Others Day",
+                    "days": salaryInfo.get("others"),
+                }
+            )
+        if salaryInfo.get("sundays_working_days"):
+            pay_slip.append(
+                "salary_calculation",
+                {
+                    "particulars": "Sunday Workings",
+                    "days":salaryInfo.get("sundays_working_days"),
+                    "rate": salaryInfo.get("per_day_salary"),
+                    "amount": salaryInfo.get("sundays_salary"),
+                }
+            )
+
+        # Update child table for "other_earnings"
+        pay_slip.other_earnings = []
+
+        pay_slip.append(
+            "other_earnings",
+            {
+                "type": "Incentives",
+                "amount": 0,
+            }
+        )
+        pay_slip.append(
+            "other_earnings",
+            {
+                "type": "Special Incentives",
+                "amount": 0,
+            }
+        )
+        pay_slip.append(
+            "other_earnings",
+            {
+                "type": "Leave Encashment",
+                "amount": salaryInfo.get("leave_encashment"),
+            }
+        )
+        pay_slip.append(
+            "other_earnings",
+            {
+                "type": "Overtime",
+                "amount": salaryInfo.get("overtime"),
+            }
+        )
+        pay_slip.append(
+            "other_earnings",
+            {
+                "type": "Holidays",
+                "amount": salaryInfo.get("holidays"),
+            }
+        )
+
         
         # Save or submit the document
         pay_slip.save()
