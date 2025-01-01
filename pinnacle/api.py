@@ -461,8 +461,7 @@ def regeneratePaySlip(data):
         })
 
         
-        print(htmlContent)
-        pay_slip.attendance_record = htmlContent
+        pay_slip.attendance_record = attendanceRecord
         
         # Update child table for "salary_calculation"
         pay_slip.salary_calculation = []
