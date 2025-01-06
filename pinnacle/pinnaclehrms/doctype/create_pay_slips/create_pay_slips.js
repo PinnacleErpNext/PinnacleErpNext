@@ -160,8 +160,8 @@ frappe.ui.form.on("Create Pay Slips", {
 			frappe.validated = false;
 			frappe.throw({
 				message: "Pay Slips cannot be generated for future months!",
-				title: "Error",
-				indicator: "red",
+				title: "Warning",
+				indicator: "orange",
 			});
 		}
 	},

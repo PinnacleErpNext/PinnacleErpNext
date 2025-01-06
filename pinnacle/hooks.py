@@ -16,7 +16,7 @@ fixtures = [
     {'dt': 'Print Format', 'filters': [['name', 'in', ['Pay Slip Format','MGC Quotation']]]},
     {'dt':'Custom Field','filters':[['name','in',['Employee Checkin-custom_comment']]]},
     {'dt':'Workspace','filters':[['name','in',['Employee Dashboard']]]},
-    {'dt':'Client Script','filters':[['name','in',['Remove Attachment','Set Naming Series in quotation','Set Naming Series for sales order']]]},
+    {'dt':'Client Script','filters':[['name','in',['Remove Attachment','Set Naming Series in quotation','Set Naming Series for sales order','Customize assignment']]]},
 ]
 
 # Each item in the list will be shown as an app in the apps page
@@ -156,6 +156,10 @@ doc_events = {
 	# 	"on_cancel": "method",
 	# 	"on_trash": "method"
 	# }
+ 
+    "Attendance":{
+        "before_save":"pinnacle.pinnaclehrms.update_emp_id.custom_before_save"
+    }
  
 }
 
