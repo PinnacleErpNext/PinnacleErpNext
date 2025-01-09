@@ -9,5 +9,38 @@
   "name": "Customize assignment",
   "script": "// Override AssignToDialog for \"Task\" DocType\nfrappe.ui.form.AssignToDialog = class CustomAssignToDialog extends frappe.ui.form.AssignToDialog {\n\tconstructor(opts) {\n\t\t// Check if the DocType matches the one you want to override\n\t\tif (opts.frm.doctype === \"Task\") {\n\t\t\tconsole.log(\"Custom AssignTo Dialog for Task\");\n\t\t}\n\t\t// Call the parent constructor\n\t\tsuper(opts);\n\t}\n\n\tget_fields() {\n\t\tlet me = this;\n\n\t\treturn [\n\t\t\t{\n\t\t\t\tlabel: __(\"Assign to me\"),\n\t\t\t\tfieldtype: \"Check\",\n\t\t\t\tfieldname: \"assign_to_me\",\n\t\t\t\tdefault: 0,\n\t\t\t\tonchange: () => me.assign_to_me(),\n\t\t\t},\n\t\t\t{\n\t\t\t\tlabel: __(\"Assign To User Group\"),\n\t\t\t\tfieldtype: \"Link\",\n\t\t\t\tfieldname: \"assign_to_user_group\",\n\t\t\t\toptions: \"User Group\",\n\t\t\t\tonchange: () => me.user_group_list(),\n\t\t\t},\n\t\t\t{\n\t\t\t\tfieldtype: \"MultiSelectPills\",\n\t\t\t\tfieldname: \"assign_to\",\n\t\t\t\tlabel: __(\"Assign To\"),\n\t\t\t\treqd: true,\n\t\t\t\tget_data: function (txt) {\n\t\t\t\t\treturn new Promise((resolve) => {\n\t\t\t\t\t\tfrappe.call({\n\t\t\t\t\t\t\tmethod: \"pinnacle.api.updateUserList\",\n\t\t\t\t\t\t\targs: {\n\t\t\t\t\t\t\t    proj: cur_frm.doc.project,\n\t\t\t\t\t\t\t\tsearch_text: txt, // Optionally pass user input to filter results\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tcallback: function (response) {\n\t\t\t\t\t\t\t\t// Handle the response\n\t\t\t\t\t\t\t\tlet user_list = response.message || []; // Get the list of users\n\t\t\t\t\t\t\t\tresolve(\n\t\t\t\t\t\t\t\t\tuser_list.map((user) => ({\n\t\t\t\t\t\t\t\t\t\tvalue: user.user, // `value` is the identifier for the user\n\t\t\t\t\t\t\t\t\t\tlabel: `${user.user}`, // `label` is the display name\n\t\t\t\t\t\t\t\t\t}))\n\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t},\n\t\t\t{\n\t\t\t\tfieldtype: \"Section Break\",\n\t\t\t},\n\t\t\t{\n\t\t\t\tlabel: __(\"Complete By\"),\n\t\t\t\tfieldtype: \"Date\",\n\t\t\t\tfieldname: \"date\",\n\t\t\t},\n\t\t\t{\n\t\t\t\tfieldtype: \"Column Break\",\n\t\t\t},\n\t\t\t{\n\t\t\t\tlabel: __(\"Priority\"),\n\t\t\t\tfieldtype: \"Select\",\n\t\t\t\tfieldname: \"priority\",\n\t\t\t\toptions: [\n\t\t\t\t\t{\n\t\t\t\t\t\tvalue: \"Low\",\n\t\t\t\t\t\tlabel: __(\"Low\"),\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\tvalue: \"Medium\",\n\t\t\t\t\t\tlabel: __(\"Medium\"),\n\t\t\t\t\t},\n\t\t\t\t\t{\n\t\t\t\t\t\tvalue: \"High\",\n\t\t\t\t\t\tlabel: __(\"High\"),\n\t\t\t\t\t},\n\t\t\t\t],\n\t\t\t\t// Pick up priority from the source document, if it exists and is available in ToDo\n\t\t\t\tdefault: [\"Low\", \"Medium\", \"High\"].includes(\n\t\t\t\t\tme.frm && me.frm.doc.priority ? me.frm.doc.priority : \"Medium\"\n\t\t\t\t),\n\t\t\t},\n\t\t\t{\n\t\t\t\tfieldtype: \"Section Break\",\n\t\t\t},\n\t\t\t{\n\t\t\t\tlabel: __(\"Comment\"),\n\t\t\t\tfieldtype: \"Small Text\",\n\t\t\t\tfieldname: \"description\",\n\t\t\t},\n\t\t];\n\t}\n};\n\n// // Add any additional behavior on Task refresh, if needed\n// frappe.ui.form.on(\"Task\", {\n// \trefresh(frm) {\n// \t\tif (!frm.is_new()) {\n// \t\t\tconsole.log(\"Task form refreshed\");\n// \t\t}\n// \t},\n// });\n",
   "view": "Form"
- }
+ },
+ {
+    "docstatus": 0,
+    "doctype": "Client Script",
+    "dt": "Quotation",
+    "enabled": 1,
+    "modified": "2024-12-18 10:58:55.959009",
+    "module": null,
+    "name": "Remove Attachment",
+    "script": "frappe.ui.form.on('Quotation', {\n after_save: function (frm) {\n // Check if the form is in draft state (newly amended) and has been amended from a cancelled document\n if (frm.doc.docstatus === 0 && frm.doc.amended_from) {\n console.log(\"Triggered: Form is amended after cancellation.\");\n // Fetch files attached to the previous Quotation document\n frappe.call({\n method: 'frappe.client.get_list',\n args: {\n doctype: 'File',\n filters: {\n attached_to_doctype: 'Quotation',\n attached_to_name: frm.doc.name // Target the original cancelled document\n },\n fields: ['name'] // Fetch only the \"name\" field of the File document\n },\n callback: function (r) {\n if (r.message && r.message.length > 0) {\n // Iterate through all matched files and delete them\n r.message.forEach(file => {\n frappe.call({\n method: 'frappe.client.delete',\n args: {\n doctype: 'File',\n name: file.name // Use the fetched file name\n },\n callback: function (delete_response) {\n frm.reload_doc()\n if (!delete_response.exc) {\n console.log(`File ${file.name} deleted successfully.`);\n } else {\n console.error(`Error deleting file: ${file.name}`);\n }\n }\n });\n });\n }\n }\n });\n }\n }\n});\n",
+    "view": "Form"
+    },
+    {
+    "docstatus": 0,
+    "doctype": "Client Script",
+    "dt": "Quotation",
+    "enabled": 1,
+    "modified": "2024-12-28 15:54:32.787176",
+    "module": "PinnacleCRM",
+    "name": "Set Naming Series in quotation",
+    "script": "frappe.ui.form.on(\"Quotation\", {\n refresh: function(frm) {\n if (frm.is_new() && frm.doc.party_name) {\n // Get fiscal year format\n let today = frappe.datetime.get_today();\n let fiscal_year = today.split(\"-\")[0]; // Get current year\n let start_year = parseInt(fiscal_year.slice(-2)); // Last two digits of the year\n let end_year = start_year + 1; // Next year\n let fy_format = `${start_year}-${end_year}`;\n\n // Determine naming series based on party_name\n if (frm.doc.party_name.includes(\"API\")) {\n frm.set_value(\"naming_series\", `SAL-QTN-API-.${fy_format}.-`);\n } else if (frm.doc.party_name.includes(\"MGC\")) {\n frm.set_value(\"naming_series\", `SAL-QTN-MGC-.${fy_format}.-`);\n } else if (frm.doc.party_name.includes(\"DSC\")) {\n frm.set_value(\"naming_series\", `SAL-QTN-DSC-.${fy_format}.-`);\n } else {\n frm.set_value(\"naming_series\", `SAL-QTN-.${fy_format}.-`);\n }\n\n // Make naming series field read-only\n frm.set_df_property(\"naming_series\", \"read_only\", true);\n }\n }\n});\n",
+    "view": "Form"
+    },
+    {
+    "docstatus": 0,
+    "doctype": "Client Script",
+    "dt": "Sales Order",
+    "enabled": 1,
+    "modified": "2024-12-28 15:53:58.368338",
+    "module": "PinnacleCRM",
+    "name": "Set Naming Series for sales order",
+    "script": "frappe.ui.form.on('Sales Order', {\n\trefresh(frm) {\n\t\t// your code here\n\t\tif (frm.is_new()) {\n // Get fiscal year format\n let today = frappe.datetime.get_today();\n let fiscal_year = today.split(\"-\")[0]; // Get current year\n let start_year = parseInt(fiscal_year.slice(-2)); // Last two digits of the year\n let end_year = start_year + 1; // Next year\n let fy_format = `${start_year}-${end_year}`;\n console.log(frm.doc.items[0].prevdoc_docname)\n // Determine naming series based on party_name\n if (frm.doc.items[0].prevdoc_docname.includes(\"API\")) {\n frm.set_value(\"naming_series\", `SAL-ORD-API-.${fy_format}.-`);\n } else if (frm.doc.items[0].prevdoc_docname.includes(\"MGC\")) {\n frm.set_value(\"naming_series\", `SAL-ORD-MGC-.${fy_format}.-`);\n } else if (frm.doc.items[0].prevdoc_docname.includes(\"DSC\")) {\n frm.set_value(\"naming_series\", `SAL-ORD-DSC-.${fy_format}.-`);\n } else {\n frm.set_value(\"naming_series\", `SAL-ORD-.${fy_format}.-`);\n }\n\n // Make naming series field read-only\n frm.set_df_property(\"naming_series\", \"read_only\", true);\n }\n\t}\n})",
+    "view": "Form"
+    }    
 ]

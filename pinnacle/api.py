@@ -2,8 +2,6 @@ import frappe
 import frappe.defaults
 from frappe import _
 import json
-import base64
-import os
 import uuid
 from frappe import sendmail
 from collections import defaultdict
@@ -11,6 +9,10 @@ from frappe.core.doctype.communication.email import make
 import frappe.utils
 import frappe.utils.print_format
 from pinnacle.pinnaclehrms.salary_calculator import createPaySlips, getEmpRecords, calculateMonthlySalary
+from frappe.model.mapper import get_mapped_doc
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
+from erpnext.selling.doctype.quotation.quotation import _make_customer
 
 # API to get default company and list
 @frappe.whitelist(allow_guest=True)
@@ -610,3 +612,22 @@ def updateUserList(proj,search_text=None):
     """
     user_permissions = frappe.db.sql(query, proj, as_dict=True)
     return user_permissions
+
+# API to remove attachments
+@frappe.whitelist(allow_guest=True)
+def remove_attachment(doctype, docname):
+    # Fetch all attachments linked to the document
+    attachments = frappe.get_all(
+    "File",
+    filters={
+    "attached_to_doctype": doctype,
+    "attached_to_name": docname
+    }
+    )
+    frappe.db.set_value('Quotation', docname, 'custom_praposal', '')
+    # Loop through and delete each attachment
+    for attachment in attachments:
+        frappe.delete_doc("File", attachment.name, force=1)
+
+    # Return a success message
+    return {"status": "success", "message": "All attachments have been removed successfully."}
