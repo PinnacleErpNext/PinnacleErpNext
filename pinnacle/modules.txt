@@ -1,4 +1,0 @@
-PinnacleGlobals
-PinnacleHRMS
-PinnacleCRM
-PinnacleProjectManagement
